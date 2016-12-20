@@ -50,10 +50,13 @@
 <p>There are many commercially available SDRs, both receiver only (<span class="caps">RX</span>) and transceiver (<span class="caps">RX</span>/<span class="caps">TX</span>), but they&#8217;re in general rather expensive (&gt;$100 for <span class="caps">RX</span> and &gt;$300 for <span class="caps">RX</span>/<span class="caps">TX</span>). This is where <span class="caps">DVB</span>-T <span class="caps">TV</span> tuner <span class="caps">USB</span> dongles based on the <span class="caps">RTL2832U</span> chipset come into play. As the name indicates, these cheap dongles (~$20) were meant for receiving <span class="caps">DVB</span>-T <span class="caps">TV</span> but hacked drivers from <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom</a> are able to turn them into wideband receiver only SDRs. This cheap <span class="caps">SDR</span> is therefore tipically known as the <span class="caps">RTL</span>-<span class="caps">SDR</span> and in the next section we&#8217;ll see what they&#8217;re made&nbsp;of.</p>
 <h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
 <p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog&#8217;s <a href="http://www.rtl-sdr.com/about-rtl-sdr/">about</a> page is a great source of further information about this awesome piece of&nbsp;hardware.</p>
-<h1>The Basic&nbsp;Software</h1>
-<p>command line tools
-pyrtlsdr
-<span class="caps">GNU</span>&nbsp;Radio</p>
+<h1>The&nbsp;Software</h1>
+<h2><span class="caps">SDR</span></h2>
+<p>The folks at the rtl-sdr blog have provided a <a href="http://www.rtl-sdr.com/">quickstart guide</a> to get your drivers installed and your dongle working with <span class="caps">SDR</span>#. This is a great program to test your <span class="caps">RTL</span>-<span class="caps">SDR</span> on.&nbsp;[&#8230;]</p>
+<h2>librtlsdr and Command Line&nbsp;tools</h2>
+<p>Pretty much all software that interfaces with the <span class="caps">RTL</span>-<span class="caps">SDR</span> makes use of this library. If you followed the quickstart guide I linked earlier and downloaded <span class="caps">SDR</span>#, one of the things that batch-file you ran did was download this library and copy the 32 bit version of rtlsdr.dll to the sdrsharp folder. Sadly it threw the rest of it away so you&#8217;ll have to go ahead to the <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr wiki</a> and download it again if you need the 64 bit version and the command line utilities that come packaged with it. You can either build it from source or grab the <a href="http://sdr.osmocom.org/trac/attachment/wiki/rtl-sdr/RelWithDebInfo.zip">pre-built windows version</a>.</p>
+<h2>pyrtlsdr</h2>
+<h2><span class="caps">GNU</span>&nbsp;Radio</h2>
 <h1>Up&nbsp;Next</h1>
 <p>My next post will give a brief overview of the <span class="caps">GPS</span> system and sampling <span class="caps">GPS</span> L1 signals. Stay&nbsp;tuned!</p>
 <h1>Useful&nbsp;Links:</h1>
@@ -73,7 +76,6 @@ pyrtlsdr
                         <ul>
                             <li><a href="https://www.kaggle.com">kaggle</a></li>
                             <li><a href="http://python.org/">Python.org</a></li>
-                            <li><a href="http://getpelican.com/">Pelican</a></li>
                         </ul>
                 </div><!-- /.blogroll -->
                 <div class="social">
@@ -95,6 +97,15 @@ pyrtlsdr
                 <p>The theme is by <a href="http://coding.smashingmagazine.com/2009/08/04/designing-a-html-5-layout-from-scratch/">Smashing Magazine</a>, thanks!</p>
         </footer><!-- /#contentinfo -->
 
+    <script type="text/javascript">
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-89270740-1', 'auto');
+    ga('send', 'pageview');
+    </script>
 <script type="text/javascript">
     var disqus_shortname = 'ajoo-blog';
     (function () {

@@ -170,9 +170,11 @@ img {
 	
 	/* Main Nav */
 	#banner nav {
+		display: flex;
+		flex-wrap: wrap;
 		background: #000305;
 		font-size: 1.143em;
-		height: 40px;
+		/*height: 40px;*/
 		line-height: 30px;
 		margin: 0 auto 2em auto;
 		padding: 0;

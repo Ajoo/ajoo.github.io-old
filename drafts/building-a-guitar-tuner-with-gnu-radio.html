@@ -2,7 +2,7 @@
 <html lang="english">
 <head>
         <meta charset="utf-8" />
-        <title>Introduction to GNU Radio</title>
+        <title>Building a Guitar Tuner with GNU Radio</title>
         <link rel="stylesheet" href="http://ajoo.blog/theme/css/main.css" />
         <link href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Wintermute Dev Logs Atom Feed" />
 
@@ -27,24 +27,27 @@
   <article>
     <header>
       <h1 class="entry-title">
-        <a href="http://ajoo.blog/drafts/introduction-to-gnu-radio.html" rel="bookmark"
-           title="Permalink to Introduction to GNU Radio">Introduction to <span class="caps">GNU</span>&nbsp;Radio</a></h1>
+        <a href="http://ajoo.blog/drafts/building-a-guitar-tuner-with-gnu-radio.html" rel="bookmark"
+           title="Permalink to Building a Guitar Tuner with GNU Radio">Building a Guitar Tuner with <span class="caps">GNU</span>&nbsp;Radio</a></h1>
     </header>
 
     <div class="entry-content">
 <footer class="post-info">
-        <span>Sun 01 January 2017</span>
+        <span>Sat 07 January 2017</span>
 <span>| tags: <a href="http://ajoo.blog/tag/gnu-radio.html">GNU Radio</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a></span>
-</footer><!-- /.post-info -->      <p>Pros:</p>
-<ul>
-<li>Provides a powerful real-time capable <span class="caps">DSP</span> library for&nbsp;python</li>
-</ul>
-<p>Cons:</p>
-<ul>
-<li>Python 2.7: This one&#8217;s a bummer. I&#8217;ve made the switch to Python 3 for all my pythonic needs and I haven&#8217;t found a library that I&#8217;ve wanted to use and didn&#8217;t support it in a long&nbsp;time;</li>
-<li>The documentation is in the classical style of <span class="caps">GNU</span> projects, that is to say, very lacking. It is auto-generated with (Doxygen)[http://gnuradio.org/doc/doxygen/] for the C++ <span class="caps">API</span>, and (Sphinx)[http://gnuradio.org/doc/sphinx/] for the Python library. But as the tutorials tell you several times, you&#8217;ll have to use the source to figure out how stuff works as often the block&#8217;s description provides little help or doesn&#8217;t exist at&nbsp;all;</li>
-<li>Extending functionality seems overly complicated: If you can build your desired application with the basic building blocks that <span class="caps">GNU</span> Radio provides &#8220;out of the box&#8221;, all is fine and dandy. However, if you have to write a certain piece of <span class="caps">DSP</span> code yourself that you can integrate with <span class="caps">GNU</span> radio&#8217;s flowcharts, you&#8217;ll have to wrangle with building CMake Modules which under Windows sounds like a nightmare based on past experience&#8230; I think I&#8217;ll have to switch over to a Linux environment for my future experiments with <span class="caps">GNU</span>&nbsp;Radio.</li>
-</ul>
+</footer><!-- /.post-info -->      <p>[&#8230;] you might have heard the phrase that our ears are logarithmic. What this means is that what we perceive as intervals between notes are actually ratios between those notes&#8217;&nbsp;frequencies.</p>
+<p>Take a middle C (C_4) whose frequency is 261.63 Hz and go up an octave, what you get is C_5 at 523.25 Hz which is twice the frequency. Do the same for any other musical notes and you&#8217;ll find that an octave &#8220;interval&#8221; gives you the same ratio of 2. So it&#8217;s not frequency differences that we can identify, it&#8217;s frequency ratios or if you prefer differences of the logarithms of the frequencies.
+To know what the ratio corresponding to 1 semitone is, recall that an octave contains 12 semitones and as such, in order to evenly divide the 2 factor by 12 semitones we get 2^{1/12} (recall we&#8217;re talking logarithmic scales&nbsp;here).</p>
+<p>(missing fundamental)[https://en.wikipedia.org/wiki/Missing_fundamental]
+(pitch&nbsp;detection)[https://en.wikipedia.org/wiki/Pitch_detection_algorithm]</p>
+<p>The least obnoxious workaround I found to fix this in Windows systems was to set the environment variable GR_CONF_audio_audio_module in the batch file that launches the <span class="caps">GNU</span> Radio command line (C:\Program Files\GNURadio-3.7\bin\run_gr.bat for me) anywhere before the call to&nbsp;python.exe:</p>
+<div class="highlight"><pre><span></span>REM --- Set PortAudio as default audio ---
+set GR_CONF_audio_audio_module=portaudio
+</pre></div>
+
+
+<p>This will make sure that whenever you launch the <span class="caps">GNU</span> Radio command prompt or the <span class="caps">GNU</span> Radio companion this environment variable will be set, telling <span class="caps">GNU</span> radio to use the portaudio library instead of the windows default for all it&#8217;s audio&nbsp;needs.</p>
+<p><span class="caps">MIC</span> <span class="caps">SETTINGS</span></p>
     </div><!-- /.entry-content -->
 
   </article>

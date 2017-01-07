@@ -134,9 +134,14 @@ aside, nav, article, figure {
 }
 
 /***** Layout *****/
-.body {clear: both; margin: 0 auto; width: 800px;}
-img.right, figure.right {float: right; margin: 0 0 2em 2em;}
-img.left, figure.left {float: left; margin: 0 2em 2em 0;}
+.body {clear: both; margin: 0 auto; max-width: 800px;}
+img.right, figure.right {float: right; margin: 0 0 2em 2em}
+img.left, figure.left {float: left; margin: 0 2em 2em 0}
+img {
+	max-width: 100%;
+	display: block;
+	margin: 0 auto;
+}
 
 /*
 	Header
@@ -280,7 +285,7 @@ img.left, figure.left {float: left; margin: 0 2em 2em 0;}
 	margin-bottom: 2em;
 	overflow: hidden;
 	padding: 20px;
-	width: 760px;
+	max-width: 760px;
 	
 	border-radius: 10px;
 	-moz-border-radius: 10px;
@@ -309,7 +314,7 @@ img.left, figure.left {float: left; margin: 0 2em 2em 0;}
 	/*margin-bottom: 2em;*/
 	overflow: hidden;
 	padding: 20px 20px;
-	width: 760px;
+	max-width: 760px;
 	
 	border-radius: 10px 10px 0 0;
 	-moz-border-radius: 10px 10px 0 0;

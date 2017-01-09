@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="948.28027"
+   height="357.16797"
+   id="svg186"
+   sodipodi:docname="SDR_system.svg"
+   inkscape:version="0.92.0 r15299">
+  <metadata
+     id="metadata190">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1536"
+     inkscape:window-height="803"
+     id="namedview188"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:pagecheckerboard="false"
+     inkscape:zoom="0.58"
+     inkscape:cx="437.95566"
+     inkscape:cy="140.26206"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="text" />
+  <defs
+     id="defs4">
+    <path
+       id="arrow"
+       d="M -10,10 H 10 L 0,-10 Z"
+       style="fill:#000000;stroke:#ffffff;stroke-width:2px"
+       inkscape:connector-curvature="0" />
+    <path
+       id="bracket"
+       d="m -100,-15 q 0,15 15,15 h 70 Q 0,0 0,15 0,0 15,0 h 70 q 15,0 15,-15"
+       style="fill:none;stroke:#444455;stroke-width:2px"
+       inkscape:connector-curvature="0" />
+  </defs>
+  <path
+     style="fill:none;stroke:#000000;stroke-width:2px"
+     d="m 620.99997,206.5918 v 30 H 1 V 56.591796 l 20,-15 M 435.99997,236.5918 v -30 m -135,30 v -120 m -135,120 v -50"
+     id="path9"
+     inkscape:connector-curvature="0" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:5px;stroke-dasharray:3, 3"
+     d="M 46.5,67.091796 V 127.0918 q 0,10 9.99997,10 h 60 m 90,-30 h 70 m -70,60 h 70"
+     id="path11"
+     inkscape:connector-curvature="0" />
+  <path
+     style="fill:none;stroke:#000000;stroke-width:5px"
+     d="m 326.49997,107.0918 h 70 m -70,60 h 70 m 70,-75.000004 h 470 m -470,90.000004 h 70 m 330,0 h 70"
+     id="path13"
+     inkscape:connector-curvature="0" />
+  <use
+     xlink:href="#arrow"
+     transform="matrix(0.6,0,0,0.6,165.99997,192.5918)"
+     id="use15"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="matrix(0.6,0,0,0.6,300.99997,192.5918)"
+     id="use17"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="matrix(0.6,0,0,0.6,435.99997,212.5918)"
+     id="use19"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="matrix(0.3,0.51961524,-0.51961524,0.3,21,43.591796)"
+     id="use21"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <g
+     id="boxes"
+     style="fill:#eeeeee;stroke:#000000;stroke-width:1px"
+     transform="translate(-34,-13.408203)">
+    <rect
+       x="150.5"
+       y="100.5"
+       width="100"
+       height="100"
+       id="flex" />
+    <rect
+       x="300.5"
+       y="100.5"
+       width="70"
+       height="40"
+       id="adc" />
+    <rect
+       x="300.5"
+       y="160.5"
+       width="70"
+       height="40"
+       id="dac" />
+    <rect
+       x="415.5"
+       y="80.5"
+       width="110"
+       height="140"
+       id="channelization" />
+    <rect
+       x="570.5"
+       y="80.5"
+       width="350"
+       height="40"
+       id="processing" />
+    <rect
+       x="570.5"
+       y="124.5"
+       width="173"
+       height="96"
+       id="hardware" />
+    <rect
+       x="747.5"
+       y="124.5"
+       width="173"
+       height="96"
+       id="software" />
+  </g>
+  <path
+     id="sa"
+     d="m 46.5,17.091796 h 24.99997 l -24.99997,50 -25,-50 h 25 v 50"
+     style="fill:none;stroke:#000000;stroke-width:1px"
+     inkscape:connector-curvature="0" />
+  <use
+     xlink:href="#bracket"
+     transform="matrix(0.8,0,0,1,135.99997,287.0918)"
+     id="use32"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#bracket"
+     transform="matrix(0.5,0,0,1,295.99997,287.0918)"
+     id="use34"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#bracket"
+     transform="matrix(0.8,0,0,1,435.99997,287.0918)"
+     id="use36"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#bracket"
+     transform="matrix(1.8,0,0,1,710.99997,287.0918)"
+     id="use38"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <g
+     id="text"
+     style="font-family:sans-serif;text-anchor:middle"
+     transform="translate(-34,-13.408203)">
+    <g
+       style="font-size:22px"
+       id="g87">
+      <text
+         x="180"
+         y="490"
+         id="text69" />
+      <text
+         x="170"
+         y="350"
+         id="text71">RF/IF</text>
+      <text
+         x="330"
+         y="340"
+         id="text75">A/D<tspan
+   dy="26"
+   x="330"
+   id="tspan73">D/A</tspan>
+</text>
+      <text
+         x="470"
+         y="340"
+         id="text79">Digital<tspan
+   dy="26"
+   x="470"
+   id="tspan77">Front End</tspan>
+</text>
+      <text
+         x="750"
+         y="340"
+         id="text83">Base Band<tspan
+   dy="26"
+   x="750"
+   id="tspan81">Processing</tspan>
+</text>
+    </g>
+    <g
+       style="font-size:13px"
+       id="g163">
+      <text
+         x="140"
+         y="30"
+         id="text115">Smart<tspan
+   x="140"
+   dy="17"
+   id="tspan113">Antenna</tspan>
+</text>
+      <text
+         x="200"
+         y="130"
+         id="text121">Flexible<tspan
+   x="200"
+   dy="17"
+   id="tspan117">RF</tspan>
+<tspan
+   x="200"
+   dy="17"
+   id="tspan119">Hardware</tspan>
+</text>
+      <text
+         x="335"
+         y="125"
+         id="text123">ADC</text>
+      <text
+         x="335"
+         y="185"
+         id="text125">DAC</text>
+      <text
+         x="265"
+         y="155"
+         id="text127">IF</text>
+      <text
+         x="470"
+         y="125"
+         id="text135">Channelization<tspan
+   x="470"
+   dy="17"
+   id="tspan129">and</tspan>
+<tspan
+   x="470"
+   dy="17"
+   id="tspan131">Sample Rate</tspan>
+<tspan
+   x="470"
+   dy="17"
+   id="tspan133">Conversion</tspan>
+</text>
+      <text
+         x="748"
+         y="110"
+         id="text137">Processing</text>
+      <text
+         style="text-anchor:start"
+         x="620"
+         y="150"
+         id="text145">Hardware<tspan
+   x="620"
+   dy="17"
+   id="tspan139">• FPGAs</tspan>
+<tspan
+   x="620"
+   dy="17"
+   id="tspan141">• DSPs</tspan>
+<tspan
+   x="620"
+   dy="17"
+   id="tspan143">• ASICs</tspan>
+</text>
+      <text
+         style="text-anchor:start"
+         x="760"
+         y="143"
+         id="text155">Software<tspan
+   x="760"
+   dy="17"
+   id="tspan147">• Algorithms</tspan>
+<tspan
+   x="760"
+   dy="17"
+   id="tspan149">• Middleware</tspan>
+<tspan
+   x="760"
+   dy="17"
+   id="tspan151">• CORBA</tspan>
+<tspan
+   x="760"
+   dy="17"
+   id="tspan153">• Virtual Radio Machine</tspan>
+</text>
+      <text
+         x="960"
+         y="90"
+         id="text157">Output</text>
+      <text
+         x="960"
+         y="180"
+         id="text159">Input</text>
+      <text
+         x="385"
+         y="280"
+         id="text161">Control</text>
+    </g>
+  </g>
+  <use
+     xlink:href="#arrow"
+     transform="rotate(90,-12.795913,124.29588)"
+     id="use166"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(-90,101.79588,35.295913)"
+     id="use168"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(90,77.204087,184.29588)"
+     id="use170"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(-90,194.29588,-27.204087)"
+     id="use172"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(90,134.70409,241.79588)"
+     id="use174"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(-90,254.29588,-87.204087)"
+     id="use176"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(90,219.70409,311.79588)"
+     id="use178"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(-90,339.29588,-157.20409)"
+     id="use180"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(90,419.70409,511.79588)"
+     id="use182"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+  <use
+     xlink:href="#arrow"
+     transform="rotate(-90,536.79588,-354.70409)"
+     id="use184"
+     x="0"
+     y="0"
+     width="100%"
+     height="100%" />
+</svg>

@@ -20,7 +20,7 @@
                     <li><a href="http://ajoo.blog/pages/cv.html"><span class="caps">CV</span></a></li>
                     <li><a href="http://ajoo.blog/pages/about.html">About</a></li>
                     <li><a href="http://ajoo.blog/category/general.html">General</a></li>
-                    <li><a href="http://ajoo.blog/category/sdr-gnss.html">SDR GNSS</a></li>
+                    <li><a href="http://ajoo.blog/category/sdr.html">SDR</a></li>
                 </ul>
                 </nav>
         </header><!-- /#banner -->
@@ -30,7 +30,7 @@
                     <h1 class="entry-title"><a href="http://ajoo.blog/software-defined-gnss.html">Software Defined <span class="caps">GNSS</span></a></h1>
 <footer class="post-info">
         <span>Sun 18 December 2016</span>
-<span>| tags: <a href="http://ajoo.blog/tag/gnss.html">GNSS</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a></span>
+<span>| tags: <a href="http://ajoo.blog/tag/gnss.html">GNSS</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a><a href="http://ajoo.blog/tag/python.html">Python</a></span>
 </footer><!-- /.post-info --><p>When I first heard about Software Defined Radios (<span class="caps">SDR</span>) I was instantly hooked. The ability to probe the electromagnetic spectrum around me and decode the ubiquitous signals being transmitted seemed to open a door to new and interesting experiments. I loved Digital Signal Processing (<span class="caps">DSP</span>) when I was in college (still do) and this was exactly what I was looking for to put it in practice. I started looking for a project to sink my teeth in that went besides using established software and a cheap <span class="caps">SDR</span> to decode well known <span class="caps">AM</span>, <span class="caps">FM</span> and <span class="caps">ADS</span>-B&nbsp;signals.</p>
 <p>Since my main background is in Guidance, Navigation and Control (and I&#8217;m a person walking this Earth in 2016) I&#8217;ve made use of <span class="caps">GPS</span> before and I&#8217;m familiar to some extent with its inner workings from a course in Global Navigation Satellite Systems (<span class="caps">GNSS</span>) I attended in college. I&#8217;ve always felt however that my knowledge of this system is not as deep as I want it to be, particularly regarding the receiver side of things. I think it&#8217;s therefore appropriate that my first foray into the exciting world of <span class="caps">SDR</span> be the implementation of a <span class="caps">GPS</span>/<span class="caps">GNSS</span> receiver in software. I intend to take this as far as I can, from measuring <span class="caps">GPS</span> L1 signals to computing a full navigation solution of position and velocity, learning as much as I can along the way and sharing it with any interested&nbsp;readers.</p>
 <p>My particular goals for this project are&nbsp;therefore:</p>
@@ -50,20 +50,25 @@
 </ul>
 <p>Below is a picture I took of the <span class="caps">USB</span> dongle and the <span class="caps">GPS</span> antenna with a 2 Euro coin for&nbsp;scale:</p>
 <p><img alt="RTL Dongle and GPS Antenna" src="http://ajoo.blog/images/RTL_dongle_and_GPS_antenna.jpg"></p>
-<h1>Existing Software Libraries and Target Audience for These Blog&nbsp;Posts</h1>
+<h1>Software</h1>
 <p>Software based <span class="caps">GNSS</span> receivers are hardly uncharted waters. There are full fledged software libraries meant to accomplish what this little project of mine set out to do. Below is a list of those I&#8217;m aware&nbsp;of:</p>
 <ul>
 <li><a href="https://github.com/taroz/GNSS-SDRLIB">gnss-sdrlib</a> An open source <span class="caps">GNSS</span> Software Defined Radio Library with nice <span class="caps">GUI</span> elements written in C and&nbsp;C++</li>
-<li><a href="http://gnss-sdr.org">gnss-sdr</a> An open source library for implementing <span class="caps">GNSS</span> software defined receivers in&nbsp;C++</li>
+<li><a href="http://gnss-sdr.org">gnss-sdr</a> An open source library for implementing <span class="caps">GNSS</span> software defined receivers in C++. Based on <span class="caps">GNU</span>&nbsp;Radio.</li>
 <li><a href="http://www.rtklib.com/">rtklib</a> An open source program package for <span class="caps">GNSS</span>&nbsp;positioning</li>
 </ul>
 <p>I will not rely on these libraries except maybe for inspiration and test purposes as this project is meant mostly as an educational experience for myself and for any readers out there. I will attempt to make my posts as informative and as self-contained as possible so that I can refer back to them in the future and so that any reader might follow along and understand how to decode <span class="caps">GNSS</span> signals without having to refer to external materials. I will assume only basic knowledge of telecommunications, specially regarding the use of Fourier transforms and time &lt;-&gt; frequency representation of signals but no previous knowledge of <span class="caps">GNSS</span>.</p>
-<h1>Up&nbsp;Next</h1>
-<p>My next post in this series will go into detail into what exactly is Software Defined Radio and the particular hardware and software that will be used in this project. Stay&nbsp;tuned!</p>
-<h1>Useful&nbsp;Links:</h1>
+<p>That being said, here are the major pieces of software that I do plan on&nbsp;using:</p>
 <ul>
-<li><a href="http://sdrgps.blogspot.com">sdrgps blog</a> A blog by Philip Hahn on his experiments with software defined radio <span class="caps">GPS</span> and its use in high-power&nbsp;rockets</li>
-</ul><p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </article>
+<li><a href="https://www.continuum.io/downloads">Python</a> It&#8217;s my language of choice for anything data science and scientific computing these days. It&#8217;s open source unlike <span class="caps">MATLAB</span>, which is the other big workhorse in my scientific computing toolbox, and that makes it much more appropriate for this series. My choice of distribution is Anaconda which I&#8217;ve been using for a long time and can personaly vouch for. It comes packed with all the scientific libraries you&#8217;ll likely need for this little&nbsp;project;</li>
+<li><a href="http://gnuradio.org/"><span class="caps">GNU</span> Radio</a> An open-source toolkit for <span class="caps">SDR</span>. Essentially a real-time capable <span class="caps">DSP</span> library that can be used in python and C++. I&#8217;m planing to use this in order to be able to decode <span class="caps">GPS</span> signals in real time while I&#8217;ll probably stick with the numpy and scipy python libraries for offline processing of collected data. The fact that there is an open source <span class="caps">SDR</span> <span class="caps">GNSS</span> library that&#8217;s built on top of it leaves me hopeful that it is adequate for my&nbsp;purposes.</li>
+</ul>
+<p>Keep in mind that these is only what I <em>intend</em> to use before diving in head first into this project. If at any point they feel inadequate I&#8217;ll have reconsider my choices in order to push the project forward towards my end goals. For one, I&#8217;ll probably have to delve into some C++ coding further on in order to implement functionality non existant in <span class="caps">GNU</span> Radio&#8217;s base&nbsp;distribution.</p>
+<h1>Related&nbsp;Endeavours</h1>
+<p>While researching this topic I found a <a href="http://sdrgps.blogspot.com">blog by Philip Hahn</a> detailing his experiments with software defined radio <span class="caps">GPS</span> and its use in high-power rockets. It should be an interesting read for anyone interested in this&nbsp;topic.</p>
+<p>Another very interesting <a href="http://lea.hamradio.si/~s53mv/navsats/theory.html">website</a> I came across on HackerNews documents the construction of a more conventional homemade <span class="caps">GPS</span>/<span class="caps">GLONASS</span> receiver by Matjaz Vidmar. It pretty much embodies what I hope to achieve with this series except with a lot less fiddling with physical hardware. While searching for the previous link after &#8220;misplacing&#8221; the bookmark I also stumbled upon a similar <a href="http://www.aholme.co.uk/GPS/Main.htm">project by Andrew Holme</a> that uses an <span class="caps">FPGA</span> to do a lot of <span class="caps">DSP</span> heavy&nbsp;lifting.</p>
+<h1>Up&nbsp;Next</h1>
+<p>My next post in this series will go into detail into what exactly is Software Defined Radio and the particular hardware and software that will be used in this project. Stay&nbsp;tuned!</p><p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </article>
             </aside><!-- /#featured -->
                 <section id="content" class="body">
                     <h1>Other articles</h1>

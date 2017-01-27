@@ -3,7 +3,7 @@
 <head>
         <meta charset="utf-8" /> 	
 		<meta name="viewport" content="width=device-width">
-        <title>Intro to RTL-SDR</title>
+        <title>Intro to RTL-SDR - Part II</title>
         <link rel="stylesheet" href="http://ajoo.blog/theme/css/main.css" />
         <link href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Wintermute Dev Logs Atom Feed" />
 
@@ -28,65 +28,35 @@
   <article>
     <header>
       <h1 class="entry-title">
-        <a href="http://ajoo.blog/drafts/intro-to-rtl-sdr.html" rel="bookmark"
-           title="Permalink to Intro to RTL-SDR">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span></a></h1>
+        <a href="http://ajoo.blog/drafts/intro-to-rtl-sdr-part-ii.html" rel="bookmark"
+           title="Permalink to Intro to RTL-SDR - Part II">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span> - Part <span class="caps">II</span></a></h1>
     </header>
 
     <div class="entry-content">
 <footer class="post-info">
-        <span>Sun 18 December 2016</span>
+        <span>Sat 21 January 2017</span>
 <span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/python.html">Python</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
-</footer><!-- /.post-info -->      <p><span class="caps">TODO</span>: </p>
-<ul>
-<li>Intro</li>
-<li>Analog Communications 101/<span class="caps">AM</span></li>
-<li>Analog Communications 101/<span class="caps">FM</span></li>
-<li>Software Defined&nbsp;Radio</li>
-<li>A cheap <span class="caps">SDR</span>/innards</li>
-<li>The&nbsp;Software/librtlsdr/pyrtlsdr</li>
-<li>The Software/librtlsdr/demodulating <span class="caps">FM</span></li>
-</ul>
-<p>Intro goes&nbsp;here</p>
-<h1>Analog Communications&nbsp;101</h1>
-<p>Communication systems often involve transmiting a message <span class="math">\(m(t)\)</span> through a pass-band channel, i.e., a channel where only a limited range of frequencies can be used. A good example is comercial <span class="caps">FM</span> radio transmitions, usually restricted to a frequency band between 85 and 108 MHz which must accomodate multiple stations, each one being allocated a &lt;200 kHZ band. Given that the message we&#8217;re interested in transmiting often has support in a different range of frequencies, as is the case of raw audio signals in the human hearing range ([20 Hz; 20 kHz]), the signal must first be shifted in frequency in order to satisfy the requirements of the particular channel of&nbsp;comunication.</p>
-<p>This is accomplished by modulation whereby one characteristic of a carrier wave (usually sinusoid like <span class="math">\(A\cos(\omega_c t)\)</span>) will be made to vary according to the <em>modulating signal</em>: <span class="math">\(m(t)\)</span> (also called the message) producing a <em>modulated signal</em>: <span class="math">\(s(t)=B(t)\cos[\omega_c t + \theta (t)]\)</span>. There are two main forms of analog&nbsp;modulation:</p>
-<ul>
-<li><strong>Amplitude Modulation (<span class="caps">AM</span>)</strong>: where the characteristic that is made to vary is the amplitude <span class="math">\(B(t)\)</span> of the&nbsp;carrier;</li>
-<li><strong>Phase/Frequency Modulation (<span class="caps">PM</span>/<span class="caps">FM</span>)</strong>: where the characteristic that varies is the phase <span class="math">\(\theta (t)\)</span> of the&nbsp;carrier.</li>
-</ul>
-<p><span class="caps">TODO</span>: [<span class="caps">IMAGE</span> <span class="caps">MODULATION</span>]</p>
-<p>We&#8217;ll discuss these in the following sections but before we move on here&#8217;s a useful glossary of terms commonly used in&nbsp;telecommunications:</p>
-<ul>
-<li><strong>Baseband</strong>: the frequency band of the modulating signal, also used to refer to the modulating signal as the baseband&nbsp;signal;</li>
-<li><strong>Center frequency</strong>: the frequency around which the spectrum of the modulated signal is&nbsp;centered;</li>
-<li><strong>Bandwidth</strong> (of a signal): some measure of the support of a signal in the frequency domain (has many different technical&nbsp;deffinitions).</li>
-</ul>
-<h1></h1>
-<h2>Amplitude&nbsp;Modulation</h2>
-<div class="math">$$m(t)e^{i2\pi f_c t}\stackrel{\mathrm{\mathcal{F}}}{\longleftrightarrow}M(f)*\delta(f-f_c)=M(f-f_c)$$</div>
-<div class="math">$$m(t)\cos(2\pi f_c t)\stackrel{\mathrm{\mathcal{F}}}{\longleftrightarrow}\frac{1}{2}[M(f-f_c)+M(f+f_c)]$$</div>
-<h2>Frequency&nbsp;Modulation</h2>
-<h1>Software Defined&nbsp;Radio</h1>
-<p>Many forms of radio communication systems were designed with analog technology in mind. Software Defined Radio (<strong><span class="caps">SDR</span></strong>) is a communication system where part of the traditionally analog signal processing, accomplished by means of analog electronic circuits is replaced by digital signal processing, accomplished my means of Analog to Digital Conversion/Digital to Analog Conversion (<span class="caps">ADC</span>/<span class="caps">DCA</span>) and general purpose computers running <span class="caps">DSP</span>&nbsp;software.</p>
-<p>By replacing hardware components with software, through inserting an <span class="caps">ADC</span>/<span class="caps">DCA</span> as far upstream the signal flow as possible and processing the digital signal instead, very flexible and general purpose systems can be realized since software is much easier to change than hardware components. Ideally, one would place an <span class="caps">ADC</span> or <span class="caps">DCA</span> directly at the antenna for maximum flexibility  but this is not practical and <span class="caps">SDR</span> systems tipically include a flexible <a href="https://en.wikipedia.org/wiki/RF_front_end"><span class="caps">RF</span> front end</a> before sampling as in the high level diagram below depicting the typical <span class="caps">SDR</span>&nbsp;system:</p>
-<p><img alt="Conceptual SDR system" src="http://ajoo.blog/images/SDR_system.svg"></p>
-<p>Note that the term Software Defined Radio denotes the whole communication system including the antenna, any specialized hardware and the computer/embedded system running the <span class="caps">DSP</span>. In the following however we&#8217;ll (ab)use it by equating it with the hardware that is used to deliver the digital samples to a personal&nbsp;computer.</p>
-<h1>A Cheap <span class="caps">SDR</span></h1>
-<p>There are many general purpose commercially available SDRs, both receiver only and transceiver, but they&#8217;re rather expensive in general (&gt;€100 for <span class="caps">RX</span> and &gt;€300 for <span class="caps">RX</span>/<span class="caps">TX</span>). This is where <span class="caps">DVB</span>-T <span class="caps">TV</span> tuner <span class="caps">USB</span> dongles based on the <span class="caps">RTL2832U</span> chipset come into play. As the name indicates, these cheap dongles (~€20) were meant for receiving <span class="caps">DVB</span>-T <span class="caps">TV</span> but hacked drivers from <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom</a> are able to turn them into wideband receiver only SDRs. This cheap <span class="caps">SDR</span> is therefore tipically known as the <strong><span class="caps">RTL</span>-<span class="caps">SDR</span></strong>:</p>
-<p><img alt="RTL dongles" src="http://ajoo.blog/images/RTL_dongles.jpg"></p>
-<p>Here you can see the two dongles I own. The one on top is a pretty generic <span class="caps">DVB</span>-T <span class="caps">USB</span> dongle from NooElec. You can see in the picture the remote that comes with it for its intended use as a <span class="caps">TV</span> tuner. It has a standard <span class="caps">MCX</span> antenna connector and comes with a small whip&nbsp;antenna.</p>
-<p>The dongle that you see at the bottom is the one sold by the <a href="http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog</a>. It comes with several improvements over the generic dongles for use as a <span class="caps">SDR</span>. You can read all about these in the the webpage linked. For my intended use of capturing <span class="caps">GPS</span> signals I was mostly interested in the software enabled bias-T in order to power an active <span class="caps">GPS</span> antenna, the <span class="caps">SMA</span> antenna connector and of course the 1 <span class="caps">PPM</span> temperature controlled oscillator for more accurate tuning (the passive cooling is a nice plus too since these units tend to run hot when tuning to frequencies &gt; 1500&nbsp;MHz).</p>
-<h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
-<p>A lot of the information in this section is collected from this <a href="http://superkuh.com/rtlsdr.html">website</a> as well&nbsp;as </p>
-<p>Mainly used with three different kinds of tuners, the discontinued (and therefore very hard to find nowadays) Elonics E4000 and the Raphael Micro <span class="caps">R820T</span> and <span class="caps">R820T2</span>. The&nbsp;frequency </p>
-<h1>The&nbsp;Software</h1>
+</footer><!-- /.post-info -->      <h1>The&nbsp;Software</h1>
 <p>In this section I&#8217;ll introduce the software I&#8217;m going to be using for <span class="caps">RTL</span> <span class="caps">SDR</span> projects. To showcase all the tools and make sure the concepts sink in I&#8217;ll be using all of them to  demodulate an <span class="caps">FM</span> signal. I&#8217;ll start with specialized tools that sample the <span class="caps">RTL</span> <span class="caps">SDR</span> and demodulate <span class="caps">FM</span> signals themselves (<strong><span class="caps">SDR</span>#</strong> and <strong>rtl_fm</strong>) and then move on to those that simply capture the <span class="caps">IQ</span> samples from the <span class="caps">RTL</span>-<span class="caps">SDR</span> (<strong>rtl_sdr</strong> and <strong>pyrtlsdr</strong>). Since python will be my language of choice for anything <span class="caps">RTL</span> <span class="caps">SDR</span> related, I&#8217;ll demodulate the <span class="caps">FM</span> signals directly from <span class="caps">IQ</span> samples using only numpy and scipy. I&#8217;m planing to, in a later post, use <span class="caps">GNU</span> radio to do the same in real time as a way to get aqquainted with the&nbsp;software.</p>
 <h2><span class="caps">SDR</span>#</h2>
-<p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog has a great <a href="http://www.rtl-sdr.com/qsg">quickstart guide</a> to get you started with your <span class="caps">RTL</span>-<span class="caps">SDR</span>. If you follow the <span class="caps">SDR</span># Setup Guide section you should be able to get your Osmocom drivers installed and your dongle working with <span class="caps">SDR</span>#. This is a great program with a nice <span class="caps">GUI</span> interface to test your <span class="caps">RTL</span>-<span class="caps">SDR</span> on. It is able to demodulate many different kinds of signals and it gives you a nice visualization of the power spectral density and spectrogram of the output of your <span class="caps">RTL</span> <span class="caps">SDR</span>.</p>
+<p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog has a great <a href="http://www.rtl-sdr.com/qsg">quickstart guide</a> to get you started with your <span class="caps">RTL</span>-<span class="caps">SDR</span>. If you follow the <span class="caps">SDR</span># Setup Guide section you should be able to get your Osmocom drivers installed and your dongle working with <span class="caps">SDR</span>#. This is a great program with a nice <span class="caps">GUI</span> interface to test your <span class="caps">RTL</span>-<span class="caps">SDR</span> on. It is able to demodulate many different kinds of signals and it gives you a nice visualization of the power spectral density (<span class="caps">PSD</span>) and spectrogram of the output of your <span class="caps">RTL</span> <span class="caps">SDR</span>. Below is a screenshot of the program depicting the <span class="caps">PSD</span> estimate for a section of the comercial <span class="caps">FM</span>&nbsp;band.</p>
+<p><img alt="SDR# screenshot" src="{filename}/images/SDR#.jpg#.jpg"></p>
 <p>We won&#8217;t play around much with this program so I won&#8217;t elaborate more, but it&#8217;s always nice to have around. Make sure to tune to an <span class="caps">FM</span> radio station you like that has a strong enough signal and write down its frequency. I will be using 97.4 MHz throughout this post, the frequency for Radio Comercial here in Lisbon, which has a particularly strong signal where I&#8217;m&nbsp;living.</p>
 <h2>librtlsdr and the Command Line&nbsp;tools</h2>
 <p>Pretty much all software that interfaces with the <span class="caps">RTL</span>-<span class="caps">SDR</span> makes use of this library. If you followed the quickstart guide linked above and downloaded <span class="caps">SDR</span>#, one of the things it has you do is run a batch file that downloads this library and copies the 32 bit version of rtlsdr.dll to the sdrsharp folder. Sadly it throws the rest of it away so you&#8217;ll have to go ahead to the <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr wiki</a> and download it again if you need the 64 bit version and the command line utilities that come packaged with it. You can either build it from <a href="http://cgit.osmocom.org/rtl-sdr">source</a> or grab the <a href="http://sdr.osmocom.org/trac/attachment/wiki/rtl-sdr/RelWithDebInfo.zip">pre-built windows version</a>.</p>
 <p>In it&#8217;s 32 and 64 bits releases librtlsdr contains a number of command line utilities and 3 dlls. Of the command line tools we&#8217;ll be mostly interested in <strong>rtl_test</strong>, <strong>rtl_sdr</strong> and <strong>rtl_fm</strong> for now. The dynamic-link library rtlsdr.dll is what contains the functions to interface with <span class="caps">RTL</span> <span class="caps">SDR</span> that are used by all other&nbsp;tools.</p>
+<p><span class="caps">TODO</span>: explain gain settings
+{
+&#8216;auto&#8217; doesn&#8217;t mean acg;
+&#8216;auto&#8217; means not manual = some default value is used;
+&#8216;set_acg_mode&#8217; = Digital <span class="caps">ACG</span> in the <span class="caps">RTL2832U</span>;&nbsp;}</p>
+<p><span class="caps">TODO</span>: library limitations
+{<span class="caps">R820T</span> also has <span class="caps">LNA</span>, mixer and <span class="caps">IF</span> gain settings - the exact steps are not known. The numbers in the library code are through measuring the gain at a fixed frequency. That gave 0..33dB for the <span class="caps">LNA</span>, 0..16dB for the mixer and -4.7..40.8dB for the <span class="caps">IF</span> gain. The current library does not expose these settings through an <span class="caps">API</span>, only <span class="caps">LNA</span> and mixer are set through some algorithm. <span class="caps">IF</span> gain is set to a fixed value. 
+The mixer gain step is 1dB (matches the empirical data passably, but not great) and the <span class="caps">IF</span>/<span class="caps">VGA</span> gain step is 3.5dB (matches mine basically dead-on). <span class="caps">LNA</span> gain step is not mentioned, all it says is &#8220;1111 - max, 0000 - min&#8221;
+33 dB+16 dB= 49 dB}
+<span class="caps">TODO</span>: frequency error 
+{For both kinds the tuner error is ~30 +-20 <span class="caps">PPM</span>}
+{All of the dongles have significant frequency offsets from reality that can be measured and corrected at runtime. My ezcap with E4000 tuner has a frequency offset of about ~44 Khz or ~57 <span class="caps">PPM</span> from reality as determined by checking against a local 751 Mhz <span class="caps">LTE</span> cell using <span class="caps">LTE</span> Cell Scanner. Here&#8217;s a plot of frequency offsets in <span class="caps">PPM</span> over a week. The major component of variation in time is ambient temperature. With the <span class="caps">R820T</span> tuner dongle after correctly for I have has a ~ -17 Khz offset at <span class="caps">GSM</span> frequencies or -35 ppm absolute after applying a 50 ppm initial error correction. When using kalibrate for this the initial frequency error is often too large and the <span class="caps">FCCH</span> peak might be outside the sampled 200 KHz bandwidth. This requires passing an initial ppm error parameter (from <span class="caps">LTE</span> scanner) -e . Another tool for checking frequency corrections is <a href="https://github.com/keenerd/rtl-sdr">keenerd&#8217;s version</a> of rtl_test which uses (I think) ntp and system clock to estimate it rather than cell phone basestation&nbsp;broadcasts.}</p>
 <h3>rtl_test</h3>
 <p>We&#8217;ll start our exploration of librtlsdr with rtl_test. This is a command line utility that allows you to perform different tests on your <span class="caps">RTL</span> <span class="caps">SDR</span> dongle and figure out the allowable ranges for some of the control parameters when capturing samples with your dongle. The following command will capture samples at 2.4 MHz and report any samples lost. You can suspend the program with Ctrl+C and it will tell you how many samples per million were&nbsp;lost:</p>
 <div class="highlight"><pre><span></span>&gt; rtl_test -s 2400000
@@ -250,76 +220,6 @@ To collect 10 seconds of data with the same characteristics as that we collected
 <p><a href="http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks--Frequency-demodulation-algorithms-"><span class="caps">DSP</span>&nbsp;Tricks</a></p>
 <h1>Up&nbsp;Next</h1>
 <p>My next posts will be an introduction to <span class="caps">GNU</span> radio where I&#8217;ll demodulate <span class="caps">FM</span> signals in real time and another which will provide a brief overview to the <span class="caps">GPS</span> system and sampling of <span class="caps">GPS</span> L1 signals. Stay&nbsp;tuned!</p>
-<h1>Useful&nbsp;Links:</h1>
-<ul>
-<li><a href="http://www.rtl-sdr.com/">rtl-sdr</a></li>
-<li><a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr&nbsp;wiki</a></li>
-<li><a href="https://www.reddit.com/r/RTLSDR/"><span class="caps">RTL</span>-<span class="caps">SDR</span> subreddit</a> A subreddit dedicated to <span class="caps">RTL</span>-<span class="caps">SDR</span>. Make sure to check their wiki which is filled with useful&nbsp;information.</li>
-<li><a href="http://rtlsdr.org/">rtlsdr Community&nbsp;Wiki</a></li>
-<li><a href="http://superkuh.com/rtlsdr.html">superkuh&#8217;s website</a> An absolute bible when it comes to the internals of <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongles. Tons of useful information, links to datasheets, schematics,&nbsp;etc&#8230; </li>
-</ul>
-<h1>Educational&nbsp;Links:</h1>
-<ul>
-<li><a href="http://www.eas.uccs.edu/~mwickert/ece4670/">University of Colorado&#8217;s Communications Lab</a> Make sure to check out their lab assignments, particularly Lab 6 which this blog post draws inspiration&nbsp;from;</li>
-<li><a href="http://web.stanford.edu/class/ee179/">Stanford&#8217;s Analog and Digital Communication Systems 2014 course</a> Again, make sure to check out the lab assignments with lots of <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;materials;</li>
-</ul>
-<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
-    var align = "center",
-        indent = "0em",
-        linebreak = "false";
-
-    if (false) {
-        align = (screen.width < 768) ? "left" : align;
-        indent = (screen.width < 768) ? "0em" : indent;
-        linebreak = (screen.width < 768) ? 'true' : linebreak;
-    }
-
-    var mathjaxscript = document.createElement('script');
-    var location_protocol = (false) ? 'https' : document.location.protocol;
-    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
-    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
-    mathjaxscript.type = 'text/javascript';
-    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
-    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
-        "MathJax.Hub.Config({" +
-        "    config: ['MMLorHTML.js']," +
-        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
-        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
-        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
-        "    displayAlign: '"+ align +"'," +
-        "    displayIndent: '"+ indent +"'," +
-        "    showMathMenu: true," +
-        "    messageStyle: 'normal'," +
-        "    tex2jax: { " +
-        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
-        "        displayMath: [ ['$$','$$'] ]," +
-        "        processEscapes: true," +
-        "        preview: 'TeX'," +
-        "    }, " +
-        "    'HTML-CSS': { " +
-        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
-        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
-        "    }, " +
-        "}); " +
-        "if ('default' !== 'default') {" +
-            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
-                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
-                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
-                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
-                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
-                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
-            "});" +
-        "}";
-    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
-}
-</script>
     </div><!-- /.entry-content -->
 
   </article>

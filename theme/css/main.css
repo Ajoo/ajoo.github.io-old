@@ -142,6 +142,11 @@ img {
 	display: block;
 	margin: 0 auto;
 }
+.figure .caption {
+    margin: 0 0 2em 0;
+    text-align: center;
+    font-size: 0.9em;
+}
 
 /*
 	Header

@@ -27,53 +27,255 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="http://ajoo.blog/software-defined-gnss.html">Software Defined <span class="caps">GNSS</span></a></h1>
+                    <h1 class="entry-title"><a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part I - Principles and&nbsp;Hardware</a></h1>
+<footer class="post-info">
+        <span>Wed 25 January 2017</span>
+<span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
+</footer><!-- /.post-info --><p><div class="figure">
+	<img src="https://c2.staticflickr.com/4/3546/4599500082_93203ec261.jpg" alt="K.W. Vanguard radio">
+	<p class="caption">A vintage <span class="caps">K.W.</span> Vanguard radio. An iconic piece of equipment from a previous era of amateur radio enthusiasts. Image by Derek via <a href=https://www.flickr.com/photos/xenoc/4599500082/>Flickr</a></p>
+</div></p>
+<p>The purpose of this two-part blog post is to introduce a piece of equipment which is quickly becoming a centerpiece of the modern radio enthusiast&#8217;s toolbox. A cheap and powerful device that allows one to digitally sample the electromagnetic spectrum at a wide range of frequencies and is breathing new life into the amateur radio (<span class="caps">HAM</span>)&nbsp;community.</p>
+<p>Initially this two-part introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> was meant as a single blog post. I intended to first go through the theory and working principles of the hardware and then move on to the software that I plan to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span> projects. Finally, I intended to use this software to implement a simple <span class="caps">FM</span> demodulator in order to illustrate my points through a practical&nbsp;application.</p>
+<p>The more I researched this topic however, the more things I found that I wanted to write about here and this post eventually grew to be too lengthy for a single serving. I wanted this first article to be quite in depth, especially regarding the inner workings of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles because I wanted to have a single point to refer back to on this matter, both for my sake and that of any readers out&nbsp;there.</p>
+<p>As such, in this first part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over some basic principles of telecommunications that I feel are essential in order to understand the working principles of <span class="caps">SDR</span> hardware. I will then describe the components that make up the <span class="caps">RTL</span>-<span class="caps">SDR</span> and explain their&nbsp;functioning. </p>
+<p>This means that this first part is mostly theoretical but I hope that doesn&#8217;t deter anyone from following along. If you&#8217;re not all that interested in understanding how everything works I guess that skipping the Innards of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles section should still provide a minimum working knowledge of <span class="caps">RTL</span>-<span class="caps">SDR</span> going forward. You can always refer back to this post if you need a more in depth understanding further along the&nbsp;path&#8230;</p>
+<h1>Analog Communications&nbsp;101</h1>
+<p>Communication systems often involve transmitting a message <span class="math">\(m(t)\)</span> through a pass-band channel, i.e., a channel where only a limited range of frequencies can be used. A good example is comercial <span class="caps">FM</span> radio transmissions, usually restricted to a frequency band between 85 and 108 MHz which must accommodate multiple stations, each one being allocated a &lt;200 kHz band. Given that the message we&#8217;re interested in transmitting often has support in a different range of frequencies, as is the case of raw audio signals in the human hearing range ([20 Hz; 20 kHz]), the signal must first be shifted in frequency in order to satisfy the requirements of the particular channel of&nbsp;communication.</p>
+<p>This is accomplished by modulation whereby one characteristic of a carrier wave (usually sinusoid like <span class="math">\(A\cos(2\pi f_ct)\)</span>) will be made to vary according to the <em>modulating signal</em>: <span class="math">\(m(t)\)</span> (also called the message) producing a <em>modulated signal</em>: <span class="math">\(s(t)=B(t)\cos[2\pi f_ct + \theta (t)]\)</span>. There are two main forms of analog&nbsp;modulation:</p>
+<ul>
+<li><strong>Amplitude Modulation (<span class="caps">AM</span>)</strong>: where the characteristic that is made to vary is the amplitude <span class="math">\(B(t)\)</span> of the&nbsp;carrier;</li>
+<li><strong>Phase/Frequency Modulation (<span class="caps">PM</span>/<span class="caps">FM</span>)</strong>: where the characteristic that varies is the phase <span class="math">\(\theta (t)\)</span> of the&nbsp;carrier.</li>
+</ul>
+<p><img alt="Modulation" src="http://ajoo.blog/images/modulation.svg"></p>
+<p>We&#8217;ll discuss these in the following sections as they help introduce a few points that are important later on but before we move on here&#8217;s a useful glossary of terms commonly used in&nbsp;telecommunications:</p>
+<ul>
+<li><strong>Baseband</strong> (signal): Signal that has support in a narrow range of frequencies about 0&nbsp;Hz;</li>
+<li><strong>Passband</strong> (signal): Signal that has support in a narrow range of frequencies about a central frequency <span class="math">\(f_c\)</span>;</li>
+<li><strong>Bandwidth</strong> (of a signal): some measure of the support of a signal in the frequency domain (has many different technical&nbsp;definitions);</li>
+</ul>
+<h1></h1>
+<h2>Amplitude&nbsp;Modulation</h2>
+<p>The simplest form of modulation is double sideband amplitude modulation (<span class="caps">DSB</span>-<span class="caps">AM</span>). As the name indicates, this modulation uses the amplitude of the modulated signal to encode the message to be sent. This is achieved by simply multiplying (or in telecommunications&#8217; lingo mixing) the message with a sinusoidal carrier&nbsp;wave.</p>
+<div class="math">$$s(t)=Am(t)\cos(2\pi f_ct)$$</div>
+<p>In the frequency domain this has the effect of convolving the Fourier transform <span class="math">\(M(f)\)</span> of <span class="math">\(m(t)\)</span> with that of a cosine&nbsp;wave:</p>
+<div class="math">$$\begin{eqnarray*}
+S(f)&amp; =&amp; M(f)*\frac{A}{2}[\delta (f-f_c) + \delta (f+f_c)]\\\\
+&amp;=&amp; \frac{A}{2}[M(f-f_c)+M(f+f_c)]
+\end{eqnarray*}$$</div>
+<p>which effectively shifts the spectrum of <span class="math">\(m\)</span> to <span class="math">\(f_c\)</span>. If <span class="math">\(m(t)\)</span> is a baseband signal, this (up)converts it to a passband signal around <span class="math">\(f_c\)</span> so it can be transmitted through an appropriate bandpass&nbsp;channel.</p>
+<p><img alt="AM modulation" src="http://ajoo.blog/images/AM_modulation.svg"></p>
+<p>Demodulating the signal can in theory be done by multiplying again by a sinusoid of the appropriate frequency. This second mixing will shift a copy of the original message back to f=0 and another to a frequency <span class="math">\(f=2f_c\)</span> which can be discarded by low-pass&nbsp;filtering. </p>
+<p><img alt="AM demodulation" src="http://ajoo.blog/images/AM_demodulation.svg"></p>
+<p>On the receiver side however we don&#8217;t know the original phase of the carrier, which we will denote <span class="math">\(\phi\)</span>, and therefore it&#8217;s impossible to align it with the sinusoid generated locally at the receiver end. Introducing this initial phase our received signal can be written&nbsp;as:</p>
+<div class="math">$$\begin{eqnarray*}
+s(t)&amp; =&amp; Am(t)\cos(2\pi f_ct+\phi)\\\\
+&amp; =&amp; Am(t)[\cos(2\pi f_ct)\cos(\phi) - \sin(2\pi f_ct)\sin(\phi)]
+\end{eqnarray*}$$</div>
+<p>The result of our naive demodulation scheme is&nbsp;then:</p>
+<div class="math">$$s(t)\cos(2\pi f_ct) = \frac{A}{2}m(t)\{[1+\cos(4\pi f_ct)]\cos(\phi)-\sin(4\pi f_ct)\sin(\phi)\}$$</div>
+<p>This is effectively <span class="math">\(\frac{A}{2}m(t)\cos(\phi)\)</span> + a couple terms at frequency <span class="math">\(2f_c\)</span> which are the result of this second mixing. Low pass filtering this signal to get rid of these higher frequency components then yields the desired result with one caveat: the constant factor <span class="math">\(\cos(\phi)\)</span> which in the worst case is 0 when the two waves are in quadrature with each&nbsp;other.</p>
+<p>One way to get around this scheme&#8217;s limitation is mixing the received signal not only with a locally generated sinusoidal wave <span class="math">\(\cos(2\pi f_ct)\)</span> but also with a second sinusoid shifted 90º in phase: <span class="math">\(-\sin(2\pi f_ct)\)</span>. After low pass-filtering this results&nbsp;in:
+</p>
+<div class="math">$$s_b(t)\doteq h_{LP}(t)*s(t)\begin{bmatrix}\cos(2\pi f_ct) \\-\sin(2\pi f_ct) \end{bmatrix}=\frac{A}{2}m(t)\begin{bmatrix}\cos(\phi) \\ \sin(\phi) \end{bmatrix}$$</div>
+<p>
+And since the sine and cosine can&#8217;t both be 0 we can always recover our message. An elegant way of doing that is by taking the Euclidean norm of the vector which gets rid of the factor depending on <span class="math">\(\phi\)</span> yielding <span class="math">\(Am(t)/2\)</span>. We can also figure out the original carrier wave&#8217;s phase from the arctangent of the two&nbsp;components.</p>
+<p><img alt="AM demodulation diagram" src="http://ajoo.blog/images/AM_demodulation_diagram_cb.svg"></p>
+<p><em>It is important to note however that in <strong>standard <span class="caps">AM</span></strong> the message must first be shifted by a constant C such that <span class="math">\(m(t)+C\geq 0\)</span>. This means higher power consumption since we&#8217;re &#8220;wasting&#8221; energy transmitting the carrier together with the message but on the other hand the receiver has access to the original carrier and certain simpler demodulation schemes such as envelope detection are&nbsp;available.</em></p>
+<h2>Complex Baseband&nbsp;Representation</h2>
+<p>What we&#8217;ve done in order to demodulate <span class="caps">AM</span> is essentially downconvert the modulated signal back to baseband. We realized however that mixing with a single sinusoid does not capture all the information present in the original passband signal but that two not in phase sinusoids must be used. This can be interpreted making use of the fact that Fourier transforms of real signals are in the general case complex functions of frequency satisfying <span class="math">\(S(f)=S^*(-f)\)</span>. Mixing a passband signal with a cosine wave will shift the spectrum but kill any imaginary component since the positive and negative frequency contributions will cancel each other out. The same is true for sine waves and real&nbsp;components. </p>
+<p>One way to retain full information is then to simply multiply the passband signal with a complex sinusoid <span class="math">\(e^{-j2\pi f_ct}\)</span> which  will shift only the positive part of the spectrum back to f=0 avoiding the whole&nbsp;issue.</p>
+<p><img alt="Complex Baseband Spectrum" src="http://ajoo.blog/images/CB_spectrum.svg"></p>
+<p>That&#8217;s exactly what we&#8217;ve done with our modified demodulation except we disguised it by writing it as a real 2-vector&nbsp;instead:
+</p>
+<div class="math">$$e^{-j2\pi f_ct}=\cos(2\pi f_ct)-j\sin(2\pi f_ct)\rightarrow \begin{bmatrix}\cos(2\pi f_ct) \\-\sin(2\pi f_ct) \end{bmatrix}$$</div>
+<p>In fact, given any passband signal <span class="math">\(s(t)\)</span>, we can write it in the&nbsp;form:
+</p>
+<div class="math">$$s(t) = 2s_I(t)\cos(2\pi f_ct)-2s_Q(t)\sin(2\pi f_ct)$$</div>
+<p>
+which implicitly defines its <strong>I</strong>n phase (<span class="math">\(s_I(t)\)</span>) and <strong>Q</strong>uadrature (<span class="math">\(s_Q(t)\)</span>) components (I/Q). It&#8217;s <strong>complex baseband representation</strong> is then defined&nbsp;as:
+</p>
+<div class="math">$$s_b(t) \doteq s_I(t)+js_Q(t)$$</div>
+<p>This is a very useful representation of a pass-band signal since it contains the same information as the original signal but is band-limited by a much lower frequency. If <span class="math">\(s(t)\)</span> has a bandwidth of W around a frequency <span class="math">\(f_c\)</span>, then it&#8217;s band-limited by <span class="math">\(f_c+W/2\)</span> and therefore, by Nyquist&#8217;s theorem, must be sampled at least at <span class="math">\(f_s \geq 2f_c+W\)</span>. By contrast, <span class="math">\(s_b(t)\)</span> is band-limited by <span class="math">\(W/2\)</span> and can be sampled and digitally processed at the (usually) much more amenable <span class="math">\(f_s \geq W\)</span>.</p>
+<p><img alt="Complex Baseband" src="http://ajoo.blog/images/complex_baseband_real_imag.svg"></p>
+<p>Alternative ways to write <span class="math">\(s(t)\)</span> as a function of <span class="math">\(s_b(t)\)</span>&nbsp;are:
+</p>
+<div class="math">$$\begin{eqnarray*}
+s(t)&amp; =&amp; \mathrm{Re}[2s_b(t)e^{j2\pi f_ct}]\\\\
+&amp;=&amp; 2\mid s_b(t)\mid\cos[2\pi f_ct+\angle s_b(t)]
+\end{eqnarray*}$$</div>
+<p>The last expression makes obvious what we already saw in the previous section about demodulating an <span class="caps">AM</span> signal given it&#8217;s complex baseband representation. That it amounts to taking it&#8217;s complex norm: <span class="math">\(\mid s_b(t)\mid\)</span> (also called the envelope). Likewise, it&#8217;s phase <span class="math">\(\angle s_b(t)\)</span> gives us all the information necessary to demodulate any angle based&nbsp;modulation.</p>
+<p>We can now represent the same diagram depicting how to obtain the complex baseband representation and reconstruct the original passband signal but in complex&nbsp;notation:</p>
+<p><img alt="Complex Baseband" src="http://ajoo.blog/images/complex_baseband_complex.svg"></p>
+<h2>Frequency&nbsp;Modulation</h2>
+<p>In frequency modulation the message is encoded in the instantaneous frequency of the carrier&nbsp;wave:</p>
+<div class="math">$$\begin{eqnarray*}
+s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\right]\\\\
+&amp;= &amp;A\cos\left[2\pi f_ct + 2\pi f_\Delta\int_{-\infty}^{t}m(\tau)d\tau\right]
+\end{eqnarray*}$$</div>
+<p>Comparing the above expression with the last formula giving the passband signal from it&#8217;s complex baseband representation we find that for a frequency modulated signal we&nbsp;have:</p>
+<div class="math">$$\mid s_b(t)\mid = \frac{A}{2},\quad\angle s_b(t) = 2\pi f_\Delta\int_{-\infty}^{t}m(\tau)d\tau$$</div>
+<p>We can thus easily find a scheme to demodulate <span class="caps">FM</span> signals by converting to complex baseband and differentiating its phase in order to find the instantaneous&nbsp;frequency:</p>
+<div class="math">$$\frac{\text{d}\angle s_b(t)}{\text{d}t} = 2\pi f_\Delta m(t)$$</div>
+<p><img alt="FM Demodulation Diagram" src="http://ajoo.blog/images/FM_demodulation_diagram.svg"></p>
+<h1>Software Defined&nbsp;Radio</h1>
+<p>Many forms of radio communication systems were designed with analog technology in mind. Software Defined Radio (<strong><span class="caps">SDR</span></strong>) is a communication system where part of the traditionally analog signal processing, accomplished by means of analog electronic circuits is replaced by digital signal processing (<span class="caps">DSP</span>, accomplished my means of analog to digital conversion/digital to analog conversion (<span class="caps">ADC</span>/<span class="caps">DAC</span>) and any form of computers or embedded system running <span class="caps">DSP</span>&nbsp;software.</p>
+<p>By replacing hardware components with software, through inserting an <span class="caps">ADC</span>/<span class="caps">DAC</span> as far upstream the signal flow as possible and processing the digital signal instead, very flexible and general purpose systems can be realized since software is much easier to change than hardware components. Ideally, one would place an <span class="caps">ADC</span> or <span class="caps">DAC</span> directly at the antenna for maximum flexibility  but this is not practical and <span class="caps">SDR</span> systems typically include a flexible <a href="https://en.wikipedia.org/wiki/RF_front_end">radio frequency (<span class="caps">RF</span>) front-end</a> before sampling as in the conceptual diagram below depicting the typical <span class="caps">SDR</span> system based on the one that can be found on <a href="https://en.wikipedia.org/wiki/Software-defined_radio">Wikipedia&#8217;s <span class="caps">SDR</span> Page</a>:</p>
+<p><img alt="Conceptual SDR system" src="http://ajoo.blog/images/SDR_system.svg"></p>
+<p>Note that the term Software Defined Radio denotes the whole communication system including the antenna, any specialized hardware and the computer/embedded system running the <span class="caps">DSP</span>. In the following however we&#8217;ll (ab)use it by equating it with the hardware that is used to deliver the digital samples to a personal computer since that is the use case we&#8217;re interested&nbsp;in.</p>
+<h1>A Cheap <span class="caps">SDR</span></h1>
+<p>There are many general purpose commercially available SDRs, both receiver only and receiver/transceiver, but they&#8217;re rather expensive in general (&gt;€100 for <span class="caps">RX</span> and &gt;€300 for <span class="caps">RX</span>/<span class="caps">TX</span>). This is where <span class="caps">DVB</span>-T <span class="caps">TV</span> tuner <span class="caps">USB</span> dongles based on the <span class="caps">RTL2832U</span> chipset come into play. As the name indicates, these cheap dongles (€10~€20) were meant for receiving <span class="caps">DVB</span>-T <span class="caps">TV</span> but hacked drivers from <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom</a> are able to turn them into wideband receiver only SDRs. This cheap <span class="caps">SDR</span> is therefore typically known as the <strong><span class="caps">RTL</span>-<span class="caps">SDR</span></strong>:</p>
+<p><img alt="RTL dongles" src="http://ajoo.blog/images/RTL_dongles.jpg"></p>
+<p>Here you can see the two dongles I own. The one on top looks like a generic <span class="caps">DVB</span>-T <span class="caps">USB</span> dongle but it was tuned by NooElec for use as a <span class="caps">SDR</span>. You can see in the picture the remote that comes with it for its original intended use as a <span class="caps">TV</span> tuner. It has a standard <span class="caps">MCX</span> antenna connector and comes with a small whip&nbsp;antenna.</p>
+<p>The dongle that you see at the bottom is the one sold by the <a href="http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog</a>. It comes with several improvements over the generic dongles for use as a <span class="caps">SDR</span>. You can read all about these in the the webpage linked. For my intended use of capturing <span class="caps">GPS</span> signals I was mostly interested in the software enabled bias-T in order to power an active <span class="caps">GPS</span> antenna, the <span class="caps">SMA</span> antenna connector and of course the 1 <span class="caps">PPM</span> temperature controlled oscillator for more accurate tuning (the passive cooling is a nice plus too since these units tend to run hot when tuning to frequencies &gt; 1500&nbsp;MHz).</p>
+<h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
+<p><div class="figure">
+	<img src="http://ajoo.blog/images/RTL_dongle_inside.png" alt="RTL dongle inside">
+	<p class="caption"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog <span class="caps">USB</span> dongle opened up. <a href=http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/>Image&nbsp;source</a></p>
+</div></p>
+<p>The overall architecture of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles is based on a <a href="https://en.wikipedia.org/wiki/Superheterodyne_receiver">superheterodyne receiver</a> which is a popular design for receivers that must be able to process signals at a wide range of user-selected frequencies, isolating them from other signals and amplifying them. Examples are many conventional <span class="caps">AM</span>/<span class="caps">FM</span> radio receivers where the user selects a channel by tuning the radio to it&#8217;s carrier wave&nbsp;frequency.</p>
+<p>A selective enough filter must be applied to the signal coming from the antenna in order to filter out other signals and noise outside the band of interest before demodulation. For the purpose described above it must also have a tunable center-frequency which makes its practical implementation troublesome. Superheterodyne architectures solve this by downconverting first to an <strong>intermediate frequency</strong> (<span class="caps">IF</span>) in which more rigorous filtering and amplification stages can be applied now that the signal is at a fixed pre-specified frequency (see the figure below for a typical&nbsp;setup).</p>
+<p><img alt="Superheterodyne Receiver" src="http://ajoo.blog/images/superhet.svg"></p>
+<p>This downconversion is achieved by mixing with a sinusoidal wave of the appropriate frequency generated by a local oscillator (<span class="caps">LO</span>). When the user selects a frequency <span class="math">\(f_c\)</span> to tune to, the <span class="caps">LO</span> generates a sine wave at either <span class="math">\(f_{LO} = f_c-f_{IF}\)</span> (low-side injection) or <span class="math">\(f_{LO} = f_c+f_{IF}\)</span> (high-side injection, note that when using this frequency the spectrum of the resulting signal will be inverted in frequency). A byproduct of this mixing is that both <span class="math">\(f_c\)</span> and <span class="math">\(f_c\mp 2f_{IF}\)</span> (for low/high side injection respectively) get mixed into the intermediate frequency. The first is the frequency of interest and the other is the so called <strong>image frequency</strong>.</p>
+<p><img alt="IF Spectrum" src="http://ajoo.blog/images/IF_spectrum.svg"></p>
+<p>An initial radio frequency (<span class="caps">RF</span>) filtering stage is therefore useful in order to filter out any signal or noise at this image frequency. This <span class="caps">RF</span> filter often has a variable center frequency whose tuning is shared with the <span class="caps">LO</span>. Another common component of the <span class="caps">RF</span> section of the receiver is an amplifier, often called a low noise amplifier (<span class="caps">LNA</span>).</p>
+<p>While traditionally the intermediate frequency signal processing section was analog, lately, due to the ubiquity of integrated circuits and the availability of micro-processors in many devices (such as cell-phones) the trend has been to handle some of these tasks digitally. In this case, superheterodyne architectures are useful as they downconvert a passband signal that is too impractical to sample (due to their high frequency requiring very high sample rates) into a lower frequency passband signal that is more manageable to sample without&nbsp;aliasing.</p>
+<p>In the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles the signal is sampled at a low intermediate frequency after an analog filtering and amplification stage and further processed digitally. <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles contain 2 important integrated circuits (ICs) which implement the different functions of the superheterodyne&nbsp;receiver:</p>
+<ul>
+<li><strong>Tuner</strong>: The <span class="caps">RF</span> front-end which implements the analog signal processing part of the receiver and is responsible for the downconversion into the intermediate&nbsp;frequency;</li>
+<li><strong>The <span class="caps">RTL2832U</span></strong>: Samples the signal and performs additional digital signal processing tasks such as decimation. Also handles <span class="caps">USB</span>&nbsp;control.</li>
+</ul>
+<p>The following sections will go into details about the function of each of these important components. Information from these sections is gathered from multiple sources including the <a href="https://github.com/steve-m/librtlsdr">Osmocom driver&#8217;s source code</a>. <a href="http://superkuh.com/rtlsdr.html">Superkuh&#8217;s website</a> deserves a special mention as it is a veritable treasure cove for anything <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;related.</p>
+<h3>Tuner</h3>
+<p>There are two main families of tuner chips of interest for <span class="caps">SDR</span> applications, the now discontinued Elonics E4000 and the Raphael Micro <span class="caps">R820T</span>/<span class="caps">R820T2</span> radio tuner which will be the focus of this discussion. The differences between the T and the T2 are small, essentially amounting to slightly better sensitivity<a href="http://superkuh.com/rtlsdr.html">¹</a> for practical&nbsp;purposes.</p>
+<p>The <a href="http://superkuh.com/gnuradio/R820T_datasheet-Non_R-20111130_unlocked.pdf">datasheet</a> for the <span class="caps">R820T</span> was leaked online so a lot is known about the inner workings of this chip. A <a href="http://superkuh.com/R820T2_Register_Description.pdf">register description</a> for the <span class="caps">R820T2</span> is also available which details the parameters of the tuner that can be set from outside. A high level simplified diagram based on the one found in the datasheet is depicted&nbsp;next:</p>
+<p><img alt="R820T Diagram" src="http://ajoo.blog/images/R820T.svg"> </p>
+<p>The signal coming from the antenna connector first goes through a low noise amplifier (<span class="caps">LNA</span>) and is then filtered by a bandpass filter and an image rejection filter. According to the datasheet, the image rejection is 65&nbsp;dBc.</p>
+<p>A fractional <span class="caps">PLL</span> based frequency synthesizer generates the <span class="caps">LO</span> that is mixed with this filtered signal in order to downconvert it to a low intermediate frequency. The user controls the local oscillator&#8217;s frequency directly through the parameters of the frequency synthesizer. This indirectly sets the <span class="caps">IF</span> frequency and whether low or high-side injection is used. 3.57 MHz and 4.57 MHz are typical values for the <span class="caps">IF</span> of <span class="caps">R820T</span> dongles<a href="http://superkuh.com/rtlsdr.html">¹</a> but it&#8217;s essentially up to the driver implementation to choose what values to use (subject to the limits imposed by the parameters of the synthesizer and the <span class="caps">IF</span>&nbsp;filter). </p>
+<p>The frequency range that the <span class="caps">RTL</span>-<span class="caps">SDR</span> is able to tune to is determined by the range of frequencies that the frequency synthesizer inside the chip can generate. The <span class="caps">R820T</span>’s official range found in the data sheet is [42; 1002] MHz with a tuning resolution of 1 Hz but the generally agreed upon real range is [24; 1766] MHz<a href="http://superkuh.com/rtlsdr.html">¹</a> as determined by the <span class="caps">RTL</span>-<span class="caps">SDR</span> community.
+In fact, using an experimental set of <a href="https://github.com/mutability/rtl-sdr/">drivers</a> this frequency range has been extended as far as [13; 1864] MHz with the upper limit having some variability depending on the dongle&nbsp;used.</p>
+<p>Finally once at the intermediate frequency the signal is again filtered and goes through a variable gain amplifier (<span class="caps">VGA</span>). The <span class="caps">IF</span> filter is usually more selective than the <span class="caps">RF</span> since that is the point of superheterodyne architectures. In the case of the <span class="caps">R820T</span> it is composed of a low-pass filter and a high-pass one that can be configured to have a bandwidth as low as 300 kHz<a href="http://lists.osmocom.org/pipermail/osmocom-sdr/2015-February/000019.html">²</a>. Its &#8220;standard values&#8221; however are either 6, 7 or 8 MHz since these are the bandwidths used by <span class="caps">DVB</span>-T&nbsp;signals. </p>
+<p>There are overall 3 gains in the tuner that can be controlled via external configuration: the <span class="caps">LNA</span>, the mixer and the <span class="caps">VGA</span>. These gains can be set manually although their precise values are absent from the datasheet. They can also be set automatically via automatic gain control (<span class="caps">AGC</span>) in order to optimize the signal to noise ratio (<span class="caps">SNR</span>). The <span class="caps">LNA</span> and mixer have a power detector at their outputs which is used to control their respective gains for this purpose. The <span class="caps">VGA</span> <span class="caps">AGC</span> is actually controlled via an analog input port to the tuner which is connected to a power detector in the <span class="caps">RTL2832U</span>.</p>
+<p><em>A note on the E4000 chips is that these use a 0 Hz <span class="caps">IF</span> so in effect they&#8217;re not implementing superheterodyne receivers. This has a notable consequence of producing a <span class="caps">DC</span> spike at 0&nbsp;Hz.</em></p>
+<h3><span class="caps">RTL2832U</span></h3>
+<p>This is the <span class="caps">IC</span> that gives the name to the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle. Unlike the tuner,  datasheets are not freely available online (you&#8217;ll need to sign an <span class="caps">NDA</span> to obtain one). A lot of what is known about the inner workings of this chip has therefore been figured out by the <span class="caps">RTL</span>-<span class="caps">SDR</span> community through reverse&nbsp;engineering. </p>
+<p>Realtek&#8217;s <a href="http://web.archive.org/web/20161012161902/http://www.realtek.com.tw/products/productsView.aspx?Langid=1&amp;PFid=35&amp;Level=4&amp;Conn=3&amp;ProdID=257"><span class="caps">RTL2832U</span> description</a> states that the chip is meant as a high-performance <span class="caps">DVB</span>-T demodulator (with additional support for <span class="caps">FM</span> and <span class="caps">DAB</span> radio). As such it includes an <span class="caps">ADC</span> to sample the <span class="caps">IF</span> signal coming from an appropriate tuner, all the specialized <span class="caps">DSP</span> required to demodulate <span class="caps">DVB</span>-T and a <span class="caps">USB</span> controller supporting a <span class="caps">USB</span> 2.0 interface. Usage as an <span class="caps">SDR</span> takes advantage of a &#8220;debug&#8221; mode in the chip to deliver the digital complex baseband representation samples directly through <span class="caps">USB</span>.</p>
+<p>The following high-level diagram represents my best understanding of the functions the <span class="caps">RTL2832U</span> is performing when using a non-zero <span class="caps">IF</span>:</p>
+<p><img alt="RTL2832U Diagram" src="http://ajoo.blog/images/RTL2832U.svg"></p>
+<p>Initially, the signal coming out of the tuner is sampled by an 8-bit <span class="caps">ADC</span> running at 28.8 MHz. No significant aliasing should occur for the low <span class="caps">IF</span> values supported if the <span class="caps">IF</span> filter is selective enough to kill any strong signals outside its&nbsp;bandwidth.</p>
+<p>A <a href="https://en.wikipedia.org/wiki/Digital_down_converter">digital downconverter</a> (<span class="caps">DDC</span>) is then responsible for downconverting the digital signal to complex baseband. The process of obtaining the complex baseband representation is the same as for the continuous-time case: mixing with two digital sinusoids in quadrature with each other and low pass filtering. The signal can then be resampled without loss of information since the baseband signal will be band-limited by a lower frequency as was explained in the previous section on complex baseband representation. External configuration parameters inform the <span class="caps">DDC</span> of the <span class="caps">IF</span> frequency and whether the spectrum is inverted (i.e., if the tuner is high-side&nbsp;injecting).</p>
+<p>Finally decimation (using a <span class="caps">FIR</span> low pass filter and downsampling) is applied in order to reduce the sample rate of the signal to a value in the range [225001; 300000] Hz ∪ [900001; 3200000] Hz. 2.56 MHz is however the generally agreed upon highest safe sample rate where no samples will be dropped by the chip (they may still be dropped by the <span class="caps">USB</span>). This decimation is what usually sets the upper limit on the bandwidth of the sampled signal (unless the <span class="caps">IF</span> filter bandwidth is specifically chosen as lower than the Nyquist frequency for the sample&nbsp;rate).</p>
+<p>The I and Q complex baseband samples are then delivered through <span class="caps">USB</span> as interleaved 8-bit unsigned&nbsp;integers.</p>
+<h2>A High Level Behavioral&nbsp;Model</h2>
+<p>It is sometimes useful to have a simplified picture in mind of the <span class="caps">RTL</span>-<span class="caps">SDR</span>&#8217;s internals. This picture, while not perfectly accurate captures the essential behavior of the hardware while hiding some of the complexity. One such behavioral level model of the <span class="caps">RTL</span>-<span class="caps">SDR</span> is presented next, based upon
+<a href="http://www.eas.uccs.edu/~mwickert/ece4670/lecture_notes/Lab6.pdf">Lab 6</a> from <a href="http://web.stanford.edu/class/ee179/">Stanford&#8217;s Analog and Digital Communication Systems 2014 course</a>:</p>
+<p><img alt="Behavioral Model" src="http://ajoo.blog/images/behavioural_model.svg"> </p>
+<p>In its essence, the <span class="caps">RTL</span>-<span class="caps">SDR</span> provides us a digital complex baseband representation of the signal at whatever frequency band we tune to. Doing away with the added complexity of the superheterodyne architecture, the <span class="caps">RTL</span>-<span class="caps">SDR</span>&#8217;s functioning can be boiled down&nbsp;to:</p>
+<ul>
+<li>Amplification;</li>
+<li>Finding the complex baseband representation through mixing with a complex sinusoid and low-pass&nbsp;filtering;</li>
+<li>Sampling.</li>
+</ul>
+<p>These are the essential steps represented in the diagram. The three essential parameters we are able to vary&nbsp;are:</p>
+<ul>
+<li>The gain values (and possible <span class="caps">AGC</span>);</li>
+<li>The center frequency we&#8217;re tuning&nbsp;to;</li>
+<li>The sample rate which can go up to ~2.56 MHz without dropping&nbsp;samples;</li>
+<li>The bandwidth of the filter which can be chosen anywhere from 300 kHz (making use of the <span class="caps">IF</span> filter inside the tuner) up to roughly the Nyquist frequency of the chosen sample rate (where the limiting factor will usually be the decimation filter inside the <span class="caps">RTL2832U</span>).</li>
+</ul>
+<h1></h1>
+<h1>Up&nbsp;Next</h1>
+<p>The second part of this introduction will introduce the basic software that most <span class="caps">RTL</span>-<span class="caps">SDR</span> enthusiasts stick to and use it to demodulate <span class="caps">FM</span> signals. Stay&nbsp;tuned!</p>
+<h1>Useful&nbsp;Links:</h1>
+<ul>
+<li><a href="http://www.rtl-sdr.com/">rtl-sdr</a></li>
+<li><a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr&nbsp;wiki</a></li>
+<li><a href="https://www.reddit.com/r/RTLSDR/"><span class="caps">RTL</span>-<span class="caps">SDR</span> subreddit</a> A subreddit dedicated to <span class="caps">RTL</span>-<span class="caps">SDR</span>. Make sure to check their wiki which is filled with useful&nbsp;information.</li>
+<li><a href="http://rtlsdr.org/">rtlsdr Community&nbsp;Wiki</a></li>
+<li><a href="http://superkuh.com/rtlsdr.html">superkuh&#8217;s website</a> An absolute bible when it comes to the internals of <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongles. Tons of useful information, links to datasheets, schematics,&nbsp;etc&#8230; </li>
+<li><a href="http://www.eas.uccs.edu/~mwickert/ece4670/">University of Colorado&#8217;s Communications Lab</a> Make sure to check out their lab assignments, particularly Lab 6 which this blog post draws inspiration&nbsp;from;</li>
+<li><a href="http://web.stanford.edu/class/ee179/">Stanford&#8217;s Analog and Digital Communication Systems 2014 course</a> Again, make sure to check out the lab assignments for lots of <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;material;</li>
+</ul>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script><p><a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html#disqus_thread">comments</a></p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="http://ajoo.blog/software-defined-gnss.html" rel="bookmark"
+                           title="Permalink to Software Defined GNSS">Software Defined <span class="caps">GNSS</span></a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <span>Sun 18 December 2016</span>
 <span>| tags: <a href="http://ajoo.blog/tag/gnss.html">GNSS</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a><a href="http://ajoo.blog/tag/python.html">Python</a></span>
-</footer><!-- /.post-info --><p>When I first heard about Software Defined Radios (<span class="caps">SDR</span>) I was instantly hooked. The ability to probe the electromagnetic spectrum around me and decode the ubiquitous signals being transmitted seemed to open a door to new and interesting experiments. I loved Digital Signal Processing (<span class="caps">DSP</span>) when I was in college (still do) and this was exactly what I was looking for to put it in practice. I started looking for a project to sink my teeth in that went besides using established software and a cheap <span class="caps">SDR</span> to decode well known <span class="caps">AM</span>, <span class="caps">FM</span> and <span class="caps">ADS</span>-B&nbsp;signals.</p>
-<p>Since my main background is in Guidance, Navigation and Control (and I&#8217;m a person walking this Earth in 2016) I&#8217;ve made use of <span class="caps">GPS</span> before and I&#8217;m familiar to some extent with its inner workings from a course in Global Navigation Satellite Systems (<span class="caps">GNSS</span>) I attended in college. I&#8217;ve always felt however that my knowledge of this system is not as deep as I want it to be, particularly regarding the receiver side of things. I think it&#8217;s therefore appropriate that my first foray into the exciting world of <span class="caps">SDR</span> be the implementation of a <span class="caps">GPS</span>/<span class="caps">GNSS</span> receiver in software. I intend to take this as far as I can, from measuring <span class="caps">GPS</span> L1 signals to computing a full navigation solution of position and velocity, learning as much as I can along the way and sharing it with any interested&nbsp;readers.</p>
-<p>My particular goals for this project are&nbsp;therefore:</p>
-<ol>
-<li>To put my knowledge of <span class="caps">GNSS</span>, telecommunications and <span class="caps">DSP</span> to work in a practical setting and keep me from getting&nbsp;rusty;</li>
-<li>To fill in the blanks in my knowledge of <span class="caps">GNSS</span> receivers&#8217; inner&nbsp;workings;</li>
-<li>To learn about new software libraries and tools, in particular those concerning real time digital signal&nbsp;processing;</li>
-<li>To improve my communication and documentation&nbsp;skills.</li>
-</ol>
-<h1></h1>
-<h1>Materials</h1>
-<p>There are only two components (three if you&#8217;re counting a decent computer/laptop) required for this project. One is an active <span class="caps">GPS</span> Antenna in order to be able to receive <span class="caps">GPS</span> signals in the L1 band (1575.42 MHz center frequency) and the other is a Software Defined Radio (<span class="caps">SDR</span>) which is responsible for delivering to your computer the digital samples of these signals shifted to&nbsp;baseband.</p>
-<p>I will go into further detail into the hardware in my next blog post so don&#8217;t worry if you don&#8217;t understand what this is for just yet. This section is only meant to give you an idea of what you&#8217;ll need and the costs associated. The particular choices I made&nbsp;are:</p>
-<ul>
-<li><a href="https://www.amazon.com/RTL-SDR-Blog-RTL2832U-Software-Telescopic/dp/B011HVUEME/ref=lp_10230687011_1_1?srs=10230687011&amp;ie=UTF8&amp;qid=1482078660&amp;sr=8-1"><span class="caps">RTL</span>-<span class="caps">SDR</span> Blog <span class="caps">USB</span> Dongle</a> (€26) I chose this over other generic <span class="caps">USB</span> <span class="caps">DVB</span>-T <span class="caps">TV</span> dongles because it has a software enabled bias-T which allows me to power an active antenna without additional hardware or soldering mods. It also has other nice enhancements over regular dongles for use in Software Defined Radio and an <span class="caps">SMA</span> antenna connector instead of the more common <span class="caps">MCX</span> which is great since we won&#8217;t need additional parts to plug in our <span class="caps">GPS</span> antenna. You could also get the version without the two telescopic antennas which comes out cheaper (€20) since we&#8217;re mostly interested in using a <span class="caps">GPS</span>&nbsp;antenna.</li>
-<li><a href="https://www.amazon.com/Waterproof-Active-Antenna-28dB-Gain/dp/B00LXRQY9A/ref=lp_10008493011_1_1?srs=10008493011&amp;ie=UTF8&amp;qid=1482079461&amp;sr=8-1"><span class="caps">GPS</span> Active Antenna</a> (€15) Any active <span class="caps">GPS</span> antenna should do, there are plenty available at Amazon and other specialized&nbsp;sellers.</li>
-</ul>
-<p>Below is a picture I took of the <span class="caps">USB</span> dongle and the <span class="caps">GPS</span> antenna with a 2 Euro coin for&nbsp;scale:</p>
-<p><img alt="RTL Dongle and GPS Antenna" src="http://ajoo.blog/images/RTL_dongle_and_GPS_antenna.jpg"></p>
-<h1>Software</h1>
-<p>Software based <span class="caps">GNSS</span> receivers are hardly uncharted waters. There are full fledged software libraries meant to accomplish what this little project of mine set out to do. Below is a list of those I&#8217;m aware&nbsp;of:</p>
-<ul>
-<li><a href="https://github.com/taroz/GNSS-SDRLIB">gnss-sdrlib</a> An open source <span class="caps">GNSS</span> Software Defined Radio Library with nice <span class="caps">GUI</span> elements written in C and&nbsp;C++</li>
-<li><a href="http://gnss-sdr.org">gnss-sdr</a> An open source library for implementing <span class="caps">GNSS</span> software defined receivers in C++. Based on <span class="caps">GNU</span>&nbsp;Radio.</li>
-<li><a href="http://www.rtklib.com/">rtklib</a> An open source program package for <span class="caps">GNSS</span>&nbsp;positioning</li>
-</ul>
-<p>I will not rely on these libraries except maybe for inspiration and test purposes as this project is meant mostly as an educational experience for myself and for any readers out there. I will attempt to make my posts as informative and as self-contained as possible so that I can refer back to them in the future and so that any reader might follow along and understand how to decode <span class="caps">GNSS</span> signals without having to refer to external materials. I will assume only basic knowledge of telecommunications, specially regarding the use of Fourier transforms and time &lt;-&gt; frequency representation of signals but no previous knowledge of <span class="caps">GNSS</span>.</p>
-<p>That being said, here are the major pieces of software that I do plan on&nbsp;using:</p>
-<ul>
-<li><a href="https://www.continuum.io/downloads">Python</a> It&#8217;s my language of choice for anything data science and scientific computing these days. It&#8217;s open source unlike <span class="caps">MATLAB</span>, which is the other big workhorse in my scientific computing toolbox, and that makes it much more appropriate for this series. My choice of distribution is Anaconda which I&#8217;ve been using for a long time and can personaly vouch for. It comes packed with all the scientific libraries you&#8217;ll likely need for this little&nbsp;project;</li>
-<li><a href="http://gnuradio.org/"><span class="caps">GNU</span> Radio</a> An open-source toolkit for <span class="caps">SDR</span>. Essentially a real-time capable <span class="caps">DSP</span> library that can be used in python and C++. I&#8217;m planing to use this in order to be able to decode <span class="caps">GPS</span> signals in real time while I&#8217;ll probably stick with the numpy and scipy python libraries for offline processing of collected data. The fact that there is an open source <span class="caps">SDR</span> <span class="caps">GNSS</span> library that&#8217;s built on top of it leaves me hopeful that it is adequate for my&nbsp;purposes.</li>
-</ul>
-<p>Keep in mind that these is only what I <em>intend</em> to use before diving in head first into this project. If at any point they feel inadequate I&#8217;ll have reconsider my choices in order to push the project forward towards my end goals. For one, I&#8217;ll probably have to delve into some C++ coding further on in order to implement functionality non existant in <span class="caps">GNU</span> Radio&#8217;s base&nbsp;distribution.</p>
-<h1>Related&nbsp;Endeavours</h1>
-<p>While researching this topic I found a <a href="http://sdrgps.blogspot.com">blog by Philip Hahn</a> detailing his experiments with software defined radio <span class="caps">GPS</span> and its use in high-power rockets. It should be an interesting read for anyone interested in this&nbsp;topic.</p>
-<p>Another very interesting <a href="http://lea.hamradio.si/~s53mv/navsats/theory.html">website</a> I came across on HackerNews documents the construction of a more conventional homemade <span class="caps">GPS</span>/<span class="caps">GLONASS</span> receiver by Matjaz Vidmar. It pretty much embodies what I hope to achieve with this series except with a lot less fiddling with physical hardware. While searching for the previous link after &#8220;misplacing&#8221; the bookmark I also stumbled upon a similar <a href="http://www.aholme.co.uk/GPS/Main.htm">project by Andrew Holme</a> that uses an <span class="caps">FPGA</span> to do a lot of <span class="caps">DSP</span> heavy&nbsp;lifting.</p>
-<h1>Up&nbsp;Next</h1>
-<p>My next post in this series will go into detail into what exactly is Software Defined Radio and the particular hardware and software that will be used in this project. Stay&nbsp;tuned!</p><p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </article>
+</footer><!-- /.post-info -->                <p>A short introduction to my Software Defined <span class="caps">GNSS</span>&nbsp;project</p>
+                <a class="readmore" href="http://ajoo.blog/software-defined-gnss.html">read more</a>
+<p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
+            </article></li>
+            </ol><!-- /#posts-list -->
 <p class="paginator">
     Page 1 / 1
 </p>
-            </aside><!-- /#featured -->
-            </ol><!-- /#posts-list -->
             </section><!-- /#content -->
         <section id="extras" class="body">
                 <div class="blogroll">

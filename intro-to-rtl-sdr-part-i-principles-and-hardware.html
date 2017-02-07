@@ -36,11 +36,17 @@
 <footer class="post-info">
         <span>Wed 25 January 2017</span>
 <span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
-</footer><!-- /.post-info -->      <p><div class="figure">
-	<img src="https://c2.staticflickr.com/4/3546/4599500082_93203ec261.jpg" alt="K.W. Vanguard radio">
-	<p class="caption">A vintage <span class="caps">K.W.</span> Vanguard radio. An iconic piece of equipment from a previous era of amateur radio enthusiasts. Image by Derek via <a href=https://www.flickr.com/photos/xenoc/4599500082/>Flickr</a></p>
+</footer><!-- /.post-info -->      <!-- {% sourced_fig
+https://c2.staticflickr.com/4/3546/4599500082_93203ec261.jpg
+"K.W. Vanguard radio"
+"A vintage K.W. Vanguard radio. An iconic piece of equipment from a previous era of amateur radio enthusiasts. Image by Derek via"
+https://www.flickr.com/photos/xenoc/4599500082/ Flickr %} -->
+
+<p><div class="figure">
+	<img src="http://ajoo.blog/external_images/nesdr_mini_2.png" width="500" alt="NooElec RTL-SDR">
+	<p class="caption">NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. <a href=http://www.nooelec.com/store/sdr/sdr-receivers/nesdr-mini-rtl2832-r820t.html>Image&nbsp;source</a></p>
 </div></p>
-<p>The purpose of this two-part blog post is to introduce a piece of equipment which is quickly becoming a centerpiece of the modern radio enthusiast&#8217;s toolbox. A cheap and powerful device that allows one to digitally sample the electromagnetic spectrum at a wide range of frequencies and is breathing new life into the amateur radio (<span class="caps">HAM</span>)&nbsp;community.</p>
+<p>The purpose of this two-part blog post is to introduce a small piece of equipment that is quickly becoming a staple of the modern radiofrequency enthusiast&#8217;s toolbox. A cheap and powerful device that allows one to digitally sample the electromagnetic spectrum at a wide range of frequencies and get the samples delivered to a personal computer via a convenient <span class="caps">USB</span>&nbsp;interface.</p>
 <p>Initially this two-part introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> was meant as a single blog post. I intended to first go through the theory and working principles of the hardware and then move on to the software that I plan to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span> projects. Finally, I intended to use this software to implement a simple <span class="caps">FM</span> demodulator in order to illustrate my points through a practical&nbsp;application.</p>
 <p>The more I researched this topic however, the more things I found that I wanted to write about here and this post eventually grew to be too lengthy for a single serving. I wanted this first article to be quite in depth, especially regarding the inner workings of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles because I wanted to have a single point to refer back to on this matter, both for my sake and that of any readers out&nbsp;there.</p>
 <p>As such, in this first part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over some basic principles of telecommunications that I feel are essential in order to understand the working principles of <span class="caps">SDR</span> hardware. I will then describe the components that make up the <span class="caps">RTL</span>-<span class="caps">SDR</span> and explain their&nbsp;functioning. </p>
@@ -134,10 +140,6 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <p>Here you can see the two dongles I own. The one on top looks like a generic <span class="caps">DVB</span>-T <span class="caps">USB</span> dongle but it was tuned by NooElec for use as a <span class="caps">SDR</span>. You can see in the picture the remote that comes with it for its original intended use as a <span class="caps">TV</span> tuner. It has a standard <span class="caps">MCX</span> antenna connector and comes with a small whip&nbsp;antenna.</p>
 <p>The dongle that you see at the bottom is the one sold by the <a href="http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog</a>. It comes with several improvements over the generic dongles for use as a <span class="caps">SDR</span>. You can read all about these in the the webpage linked. For my intended use of capturing <span class="caps">GPS</span> signals I was mostly interested in the software enabled bias-T in order to power an active <span class="caps">GPS</span> antenna, the <span class="caps">SMA</span> antenna connector and of course the 1 <span class="caps">PPM</span> temperature controlled oscillator for more accurate tuning (the passive cooling is a nice plus too since these units tend to run hot when tuning to frequencies &gt; 1500&nbsp;MHz).</p>
 <h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
-<p><div class="figure">
-	<img src="http://ajoo.blog/images/RTL_dongle_inside.png" alt="RTL dongle inside">
-	<p class="caption"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog <span class="caps">USB</span> dongle opened up. <a href=http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/>Image&nbsp;source</a></p>
-</div></p>
 <p>The overall architecture of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles is based on a <a href="https://en.wikipedia.org/wiki/Superheterodyne_receiver">superheterodyne receiver</a> which is a popular design for receivers that must be able to process signals at a wide range of user-selected frequencies, isolating them from other signals and amplifying them. Examples are many conventional <span class="caps">AM</span>/<span class="caps">FM</span> radio receivers where the user selects a channel by tuning the radio to it&#8217;s carrier wave&nbsp;frequency.</p>
 <p>A selective enough filter must be applied to the signal coming from the antenna in order to filter out other signals and noise outside the band of interest before demodulation. For the purpose described above it must also have a tunable center-frequency which makes its practical implementation troublesome. Superheterodyne architectures solve this by downconverting first to an <strong>intermediate frequency</strong> (<span class="caps">IF</span>) in which more rigorous filtering and amplification stages can be applied now that the signal is at a fixed pre-specified frequency (see the figure below for a typical&nbsp;setup).</p>
 <p><img alt="Superheterodyne Receiver" src="http://ajoo.blog/images/superhet.svg"></p>
@@ -150,6 +152,10 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <li><strong>Tuner</strong>: The <span class="caps">RF</span> front-end which implements the analog signal processing part of the receiver and is responsible for the downconversion into the intermediate&nbsp;frequency;</li>
 <li><strong>The <span class="caps">RTL2832U</span></strong>: Samples the signal and performs additional digital signal processing tasks such as decimation. Also handles <span class="caps">USB</span>&nbsp;control.</li>
 </ul>
+<p><div class="figure">
+	<img src="http://ajoo.blog/external_images/nesdr_mini_pcb_annotated.jpg" width="500" alt="NooElec RTL-SDR PCB">
+	<p class="caption">NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle opened up. <a href=http://www.nooelec.com/store/sdr/sdr-receivers/nesdr-mini-rtl2832-r820t.html>Image&nbsp;source</a></p>
+</div></p>
 <p>The following sections will go into details about the function of each of these important components. Information from these sections is gathered from multiple sources including the <a href="https://github.com/steve-m/librtlsdr">Osmocom driver&#8217;s source code</a>. <a href="http://superkuh.com/rtlsdr.html">Superkuh&#8217;s website</a> deserves a special mention as it is a veritable treasure cove for anything <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;related.</p>
 <h3>Tuner</h3>
 <p>There are two main families of tuner chips of interest for <span class="caps">SDR</span> applications, the now discontinued Elonics E4000 and the Raphael Micro <span class="caps">R820T</span>/<span class="caps">R820T2</span> radio tuner which will be the focus of this discussion. The differences between the T and the T2 are small, essentially amounting to slightly better sensitivity<a href="http://superkuh.com/rtlsdr.html">¹</a> for practical&nbsp;purposes.</p>
@@ -168,7 +174,7 @@ In fact, using an experimental set of <a href="https://github.com/mutability/rtl
 <p>The following high-level diagram represents my best understanding of the functions the <span class="caps">RTL2832U</span> is performing when using a non-zero <span class="caps">IF</span>:</p>
 <p><img alt="RTL2832U Diagram" src="http://ajoo.blog/images/RTL2832U.svg"></p>
 <p>Initially, the signal coming out of the tuner is sampled by an 8-bit <span class="caps">ADC</span> running at 28.8 MHz. No significant aliasing should occur for the low <span class="caps">IF</span> values supported if the <span class="caps">IF</span> filter is selective enough to kill any strong signals outside its&nbsp;bandwidth.</p>
-<p>A <a href="https://en.wikipedia.org/wiki/Digital_down_converter">digital downconverter</a> (<span class="caps">DDC</span>) is then responsible for downconverting the digital signal to complex baseband. The process of obtaining the complex baseband representation is the same as for the continuous-time case: mixing with two digital sinusoids in quadrature with each other and low pass filtering. The signal can then be resampled without loss of information since the baseband signal will be band-limited by a lower frequency as was explained in the previous section on complex baseband representation. External configuration parameters inform the <span class="caps">DDC</span> of the <span class="caps">IF</span> frequency and whether the spectrum is inverted (i.e., if the tuner is high-side&nbsp;injecting).</p>
+<p>A <a href="https://en.wikipedia.org/wiki/Digital_down_converter">digital downconverter</a> (<span class="caps">DDC</span>) is then responsible for downconverting the digital signal to complex baseband. The process of obtaining the complex baseband representation is similar to the continuous-time case: mixing with a complex sinusoid will circularly shift the spectrum from <span class="caps">IF</span> down to baseband. The signal can then be low pass-filtered and downsampled to get rid of the unnecessary part of the spectrum that was shifted to higher frequencies since the signal of interest is now band-limited by a lower frequency. External configuration parameters inform the <span class="caps">DDC</span> of the <span class="caps">IF</span> frequency and whether the spectrum is inverted (i.e., if the tuner is high-side&nbsp;injecting).</p>
 <p>Finally decimation (using a <span class="caps">FIR</span> low pass filter and downsampling) is applied in order to reduce the sample rate of the signal to a value in the range [225001; 300000] Hz ∪ [900001; 3200000] Hz. 2.56 MHz is however the generally agreed upon highest safe sample rate where no samples will be dropped by the chip (they may still be dropped by the <span class="caps">USB</span>). This decimation is what usually sets the upper limit on the bandwidth of the sampled signal (unless the <span class="caps">IF</span> filter bandwidth is specifically chosen as lower than the Nyquist frequency for the sample&nbsp;rate).</p>
 <p>The I and Q complex baseband samples are then delivered through <span class="caps">USB</span> as interleaved 8-bit unsigned&nbsp;integers.</p>
 <h2>A High Level Behavioral&nbsp;Model</h2>
@@ -276,25 +282,19 @@ In fact, using an experimental set of <a href="https://github.com/mutability/rtl
   </article>
 </section>
         <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>blogroll</h2>
-                        <ul>
-                            <li><a href="mailto:ajoo@outlook.pt">email</a></li>
-                            <li><a href="https://www.kaggle.com/ajoo88">kaggle</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
                 <div class="social">
                         <h2>social</h2>
                         <ul>
                             <li><a href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
 
                             <li><a href="https://github.com/Ajoo">github</a></li>
+                            <li><a href="mailto:ajoo@outlook.pt">email</a></li>
                         </ul>
                 </div><!-- /.social -->
         </section><!-- /#extras -->
 
         <footer id="contentinfo" class="body">
-                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
+                <p>© 2017 ajoo.blog. All rights reserved. Powered by <a href="http://getpelican.com/">Pelican</a>. Theme is a fork of <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
         </footer><!-- /#contentinfo -->
 
     <script type="text/javascript">

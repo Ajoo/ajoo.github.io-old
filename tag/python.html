@@ -27,74 +27,510 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="http://ajoo.blog/software-defined-gnss.html">Software Defined <span class="caps">GNSS</span></a></h1>
+                    <h1 class="entry-title"><a href="http://ajoo.blog/intro-to-rtl-sdr-part-ii-software.html">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part <span class="caps">II</span> -&nbsp;Software</a></h1>
+<footer class="post-info">
+        <span>Tue 07 February 2017</span>
+<span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/python.html">Python</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
+</footer><!-- /.post-info --><p><div class="figure">
+	<img src="http://ajoo.blog/external_images/SDRBlogImage_1_Rotated.jpg" width="500" alt="RTL-SDR blog USB dongle">
+	<p class="caption"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog <span class="caps">USB</span> dongle. <a href=http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/>Image&nbsp;source</a></p>
+</div></p>
+<p>In this second and final part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over the most popular software that is available for use with <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles. I&#8217;ll try to provide a big picture but I&#8217;ll be focusing more on what I intend to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;projects.</p>
+<p>As a software defined radio Hello World of sorts I&#8217;ll go over how to demodulate <span class="caps">FM</span> signals using a variety of tools. First using specialized software that does the demodulation for us (<span class="caps">SDR</span># and rtl_fm) and then doing the demodulation directly from captured samples of the complex-baseband representation (<span class="caps">IQ</span>) using the python scientific computing&nbsp;ecosystem. </p>
+<p>This post builds on the concepts presented in the <a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html">first part of this introduction</a> helping frame them in the context of a real world&nbsp;application.</p>
+<h1><span class="caps">SDR</span>#</h1>
+<p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog has a great <a href="http://www.rtl-sdr.com/qsg">quickstart guide</a> to get you started with your <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. If you&#8217;re on Windows and follow the <span class="caps">SDR</span># Setup Guide section you should be able to get your generic WinUSB drivers installed and your dongle working with <span class="caps">SDR</span>#. This program is a bit of a Jack of all trades when it comes to <span class="caps">SDR</span>. With a nice <span class="caps">GUI</span> interface it is able to demodulate many different kinds of signals providing you a nice visualization of the power spectral density (<span class="caps">PSD</span>) estimate and spectrogram (also known as waterfall) of the output of your <span class="caps">RTL</span>-<span class="caps">SDR</span>. Below is a screenshot of the program running when tuned for a section of the comercial <span class="caps">FM</span>&nbsp;band:</p>
+<p><img alt="SDR# screenshot" src="http://ajoo.blog/images/SDR_sharp_screenshot.jpg"></p>
+<p>We won&#8217;t play around much with this program so I won&#8217;t elaborate more, but it&#8217;s always nice to have around. Make sure to tune to an <span class="caps">FM</span> radio station you like that has a strong enough signal and write down its frequency. I will be using 97.4 MHz throughout this post, the frequency for Radio Comercial here in Lisbon, which has a particularly strong signal where I&#8217;m&nbsp;living.</p>
+<h1>librtlsdr and the rtl-sdr&nbsp;codebase</h1>
+<p>Most software that interfaces with the <span class="caps">RTL</span>-<span class="caps">SDR</span> makes use of this library. If you followed the quickstart guide linked above and downloaded <span class="caps">SDR</span>#, one of the things it has you do is run a batch file that downloads a pre-build package of this codebase and copies the 32 bit version of rtlsdr.dll to the sdrsharp folder. Sadly it throws the rest of it away so you&#8217;ll have to go ahead to the <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr website</a> and download it again if you need the 64 bit version and the command line utilities that come packaged with it. You can either grab the <a href="http://sdr.osmocom.org/trac/attachment/wiki/rtl-sdr/RelWithDebInfo.zip">pre-built windows version</a> or <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr#Buildingthesoftware">build it from source</a> if you&#8217;re on Linux (or feeling&nbsp;adventurous).</p>
+<p>The <a href="http://cgit.osmocom.org/rtl-sdr">rtl-sdr codebase</a> (alternative <a href="https://github.com/steve-m/librtlsdr">github mirror</a>), curated by Osmocom is the backbone of the rtl-sdr community. It contains the code for both the rtlsdr.dll drivers (librtlsdr) and a number of command line utilities that use this library to perform a number of functions. Out of these we&#8217;ll be mostly interested in <strong>rtl_test</strong>, <strong>rtl_sdr</strong> and <strong>rtl_fm</strong> for now. The following sections will go into detail about each of these tools but for now let us focus on the main&nbsp;library.</p>
+<p>The driver relies on libusb (which comes conveniently packed with the pre-built windows version but must be separately installed on Linux) to provide functions to interface with the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle. The functions it exports are what allow us to set the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle configuration parameters and read <span class="caps">IQ</span> samples. Some of these parameters are not exposed directly but are instead set through an internal algorithm. One possible reason for this is that the driver must support <span class="caps">RTL</span> dongles sporting a number of different tuner chips while providing a uniform tuner-agnostic interface. To give you an idea of the library&#8217;s capabilities, the list that follows details the most relevant (for now) functions that it exports and what their implementations mean for dongles with a <span class="caps">R820T</span>/T2&nbsp;tuner:</p>
+<ul>
+<li><strong>rtlsdr_open/close</strong>: opens the device and initializes it/closes the&nbsp;device;</li>
+<li><strong>rtlsdr_get_center_freq/set</strong>: gets/sets the center frequency to tune to by configuring the tuner&#8217;s <span class="caps">PLL</span> based frequency synthesizer to <span class="math">\(f_c + f_{IF}\)</span> (high-side&nbsp;injection);</li>
+<li><strong>rtlsdr_get_freq_correction/set</strong>: gets/sets the frequency correction parameter in parts per million&nbsp;(ppm);</li>
+<li><strong>rtlsdr_get_tuner_type</strong>: gets the tuner&nbsp;type;</li>
+<li><strong>rtlsdr_get_tuner_gains</strong>: gets the list of supported gain values by the tuner. For the <span class="caps">R820T</span> this list is hardcoded and was determined experimentally. Its single parameter corresponds to all possible combinations of <span class="caps">LNA</span> and mixer gains as the <span class="caps">VGA</span> is always set to a fixed&nbsp;value;</li>
+<li><strong>rtlsdr_set_tuner_gain_mode</strong>: sets the tuner gain mode to automatic (<span class="caps">AGC</span> is used for both <span class="caps">LNA</span> and mixer) or manual (gain value is provided manually through the next&nbsp;function);</li>
+<li><strong>rtlsdr_get_tuner_gain/set</strong>: gets/sets the tuner gains. For <span class="caps">R820T</span> it selects the <span class="caps">LNA</span> and mixer gains in order to provide a gain value as close as possible to the provided gain. <span class="caps">VGA</span> gain (<span class="caps">IF</span> gain) is set to a&nbsp;constant;</li>
+<li><strong>rtlsdr_set_tuner_if_gain</strong>: sets <span class="caps">IF</span> gain. Unsuported for <span class="caps">R820T</span>;</li>
+<li><strong>rtlsdr_set_tuner_bandwidth</strong>: sets the tuner bandwidth through adjusting the <span class="caps">IF</span> filters. In practice, the list of supported values by the <span class="caps">R820T</span> tuner are 6, 7 and 8 MHz or a list of values ranging from 350 kHz to 2.43 MHz. The driver will always round upwards to the nearest supported value. The <span class="caps">IF</span> frequency used by the device is determined based on the bandwidth chosen with 4.57 MHz being used for 7 or 8 MHz bandwidth, 3.57 MHz for 6 MHz bandwidth and 2.3 MHz for any smaller bandwidth&nbsp;values;</li>
+<li><strong>rtlsdr_get_sample_rate/set</strong>: gets/sets the sample rate of the rtl-sdr output to a value inside the allowed range of [225001; 300000] Hz ∪ [900001; 3200000] Hz. Also sets the bandwidth of the tuner to be the same as the sample rate if it wasn&#8217;t set manually&nbsp;before.</li>
+<li><strong>rtlsdr_set_agc_mode</strong>: sets the <span class="caps">RTL2832U</span> to use digital <span class="caps">AGC</span> (not the tuner&#8217;s). This seems to amount only to simple fixed gain value being&nbsp;applied;</li>
+<li><strong>rtlsdr_read_sync</strong>: reads a fixed number of interleaved 8-bit <span class="caps">IQ</span> samples from the device&nbsp;synchronously;</li>
+<li><strong>rtlsdr_read_async/cancel_async</strong>: reads asynchronously from the device until cancel_async is&nbsp;called.</li>
+</ul>
+<p>It should be mentioned that, as with a lot of useful open source software, there exist a number of forks that seek to tweak and extend the capabilities of the rtl-sdr beyond what the standard drivers allow. Most of these should however be considered experimental. Two examples of such forks&nbsp;are:</p>
+<ul>
+<li><a href="https://github.com/mutability/rtl-sdr/">mutability&#8217;s</a>: which extends the tuning range of the standard driver via a number of tricks involving manipulating the <span class="caps">IF</span> frequency and whether high or low-side injection is&nbsp;used;</li>
+<li><a href="https://github.com/keenerd/rtl-sdr">keenerd&#8217;s</a>: from the author of the rtl_fm and rtl_power command line tools which includes some modifications to the command line&nbsp;utilities;</li>
+</ul>
+<h1></h1>
+<h2>rtl_test</h2>
+<p>We&#8217;ll start our exploration of the rtl-sdr command tools with rtl_test. This is an utility that allows you to perform different tests on your <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle and figure out the allowable ranges for some of the control parameters when capturing samples with your dongle. The following command will capture samples at 2.4 MHz and report any samples lost. You can suspend the program with Ctrl+C and it will tell you how many samples per million were&nbsp;lost:</p>
+<div class="highlight"><pre><span></span>$ rtl_test -s 2400000
+Found <span class="m">1</span> device<span class="o">(</span>s<span class="o">)</span>:
+  0:  Realtek, RTL2838UHIDIR, SN: 00000001
+
+Using device 0: Generic RTL2832U OEM
+Found Rafael Micro R820T tuner
+Supported gain values <span class="o">(</span>29<span class="o">)</span>: 0.0 0.9 1.4 2.7 3.7 7.7 8.7 12.5 14.4 15.7 16.6 19.7 20.7
+ 22.9 25.4 28.0 29.7 32.8 33.8 36.4 37.2 38.6 40.2 42.1 43.4 43.9 44.5 48.0 49.6 
+<span class="o">[</span>R82XX<span class="o">]</span> PLL not locked!
+Sampling at <span class="m">2400000</span> S/s.
+
+Info: This tool will continuously <span class="nb">read</span> from the device, and report <span class="k">if</span>
+samples get lost. If you observe no further output, everything is fine.
+
+Reading samples in async mode...
+^CSignal caught, exiting!
+
+User cancel, exiting...
+Samples per million lost <span class="o">(</span>minimum<span class="o">)</span>: 0
+</pre></div>
+
+
+<p>As you can see it will also report all the supported values for the gain setting of the tuner (see <em>rtlsdr_get_tuner_gains</em>).  The <span class="caps">PLL</span> not locked message meaning that a lock was not achieved in the frequency synthesizer does not show up when running the program under windows and I&#8217;m not sure what causes it. My NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> blog dongle is not dropping any samples at 2.4 MHz. You can try different settings of the sample rate with the <strong>-s</strong> option within the allowable range (see <em>rtlsdr_set_sample_rate</em> above) in order to figure out a maximum safe sample rate at which no samples are dropped (typically 2.56 MHz before the <span class="caps">RTL2832U</span> starts dropping samples internally). For instance, trying to sample at the known &#8220;unsafe&#8221; rate of 2.7 MHz&nbsp;yields:</p>
+<div class="highlight"><pre><span></span>Sampling at <span class="m">2700000</span> S/s.
+
+Info: This tool will continuously <span class="nb">read</span> from the device, and report <span class="k">if</span>
+samples get lost. If you observe no further output, everything is fine.
+
+Reading samples in async mode...
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">188</span> bytes
+lost at least <span class="m">256</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">188</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+lost at least <span class="m">68</span> bytes
+^CSignal caught, exiting!
+
+User cancel, exiting...
+Samples per million lost <span class="o">(</span>minimum<span class="o">)</span>: 11
+</pre></div>
+
+
+<p>The tuner&#8217;s local oscillator frequency can present a significant offset from reality due to the low quality crystal ocillator present in most dongles. Perhaps one of the most useful functions of rtl_test is measuring this error through the the <strong>-p</strong> option which will report the frequency error in parts per million (<span class="caps">PPM</span>) as estimated (I think) from  tuning to <span class="caps">GSM</span> basestation signals of well known (high) frequency. These frequency errors will vary based on ambient temperature but are otherwise quite repeatable (even inter day). 
+Letting it run for a few minutes should give you a somewhat reliable estimate that you can then use as the frequency correction parameter for other programs such as <span class="caps">SDR</span># or rtl_sdr. The following is the result of running the program with the <strong>-p</strong> option using my NooElec dongle directly after plugging it in (not warmed&nbsp;up):</p>
+<div class="highlight"><pre><span></span>$ rtl_test -s <span class="m">2400000</span> -p
+Found <span class="m">1</span> device<span class="o">(</span>s<span class="o">)</span>:
+  0:  Realtek, RTL2838UHIDIR, SN: 00000001
+
+Using device 0: Generic RTL2832U OEM
+Found Rafael Micro R820T tuner
+Supported gain values <span class="o">(</span>29<span class="o">)</span>: 0.0 0.9 1.4 2.7 3.7 7.7 8.7 12.5 14.4 15.7 16.6 19.7 20.7
+ 22.9 25.4 28.0 29.7 32.8 33.8 36.4 37.2 38.6 40.2 42.1 43.4 43.9 44.5 48.0 49.6 
+<span class="o">[</span>R82XX<span class="o">]</span> PLL not locked!
+Sampling at <span class="m">2400000</span> S/s.
+Reporting PPM error measurement every <span class="m">10</span> seconds...
+Press ^C after a few minutes.
+Reading samples in async mode...
+real sample rate: <span class="m">2400188</span> current PPM: <span class="m">78</span> cumulative PPM: 78
+real sample rate: <span class="m">2400164</span> current PPM: <span class="m">69</span> cumulative PPM: 73
+real sample rate: <span class="m">2400190</span> current PPM: <span class="m">80</span> cumulative PPM: 75
+real sample rate: <span class="m">2400153</span> current PPM: <span class="m">64</span> cumulative PPM: 73
+real sample rate: <span class="m">2400151</span> current PPM: <span class="m">63</span> cumulative PPM: 71
+real sample rate: <span class="m">2400153</span> current PPM: <span class="m">64</span> cumulative PPM: 70
+real sample rate: <span class="m">2400159</span> current PPM: <span class="m">66</span> cumulative PPM: 69
+real sample rate: <span class="m">2400177</span> current PPM: <span class="m">74</span> cumulative PPM: 70
+real sample rate: <span class="m">2400157</span> current PPM: <span class="m">66</span> cumulative PPM: 69
+real sample rate: <span class="m">2400163</span> current PPM: <span class="m">68</span> cumulative PPM: 69
+real sample rate: <span class="m">2400150</span> current PPM: <span class="m">63</span> cumulative PPM: 69
+real sample rate: <span class="m">2400197</span> current PPM: <span class="m">82</span> cumulative PPM: 70
+real sample rate: <span class="m">2400155</span> current PPM: <span class="m">65</span> cumulative PPM: 69
+real sample rate: <span class="m">2400144</span> current PPM: <span class="m">60</span> cumulative PPM: 69
+real sample rate: <span class="m">2400165</span> current PPM: <span class="m">69</span> cumulative PPM: 69
+real sample rate: <span class="m">2400150</span> current PPM: <span class="m">63</span> cumulative PPM: 68
+real sample rate: <span class="m">2400169</span> current PPM: <span class="m">71</span> cumulative PPM: 68
+real sample rate: <span class="m">2400166</span> current PPM: <span class="m">70</span> cumulative PPM: 68
+real sample rate: <span class="m">2400164</span> current PPM: <span class="m">69</span> cumulative PPM: 69
+^CSignal caught, exiting!
+
+User cancel, exiting...
+Samples per million lost <span class="o">(</span>minimum<span class="o">)</span>: 0
+</pre></div>
+
+
+<p>The results I get from my rtl-sdr.com dongle paint a very different picture owing to it&#8217;s much more accurate 1 <span class="caps">PPM</span> temperature compensated oscillator. After plugging in the dongle the cumulative frequency error quickly drops to a much smaller&nbsp;value:</p>
+<div class="highlight"><pre><span></span>real sample rate: <span class="m">2400001</span> current PPM: <span class="m">1</span> cumulative PPM: 1
+real sample rate: <span class="m">2399958</span> current PPM: -17 cumulative PPM: -8
+real sample rate: <span class="m">2400060</span> current PPM: <span class="m">25</span> cumulative PPM: 3
+real sample rate: <span class="m">2399996</span> current PPM: -2 cumulative PPM: 2
+real sample rate: <span class="m">2400014</span> current PPM: <span class="m">6</span> cumulative PPM: 3
+real sample rate: <span class="m">2399948</span> current PPM: -21 cumulative PPM: -1
+real sample rate: <span class="m">2400026</span> current PPM: <span class="m">11</span> cumulative PPM: 0
+real sample rate: <span class="m">2400005</span> current PPM: <span class="m">2</span> cumulative PPM: 1
+real sample rate: <span class="m">2400072</span> current PPM: <span class="m">30</span> cumulative PPM: 4
+real sample rate: <span class="m">2399939</span> current PPM: -25 cumulative PPM: 1
+real sample rate: <span class="m">2400011</span> current PPM: <span class="m">5</span> cumulative PPM: 1
+real sample rate: <span class="m">2399996</span> current PPM: -1 cumulative PPM: 1
+real sample rate: <span class="m">2400017</span> current PPM: <span class="m">7</span> cumulative PPM: 2
+real sample rate: <span class="m">2399950</span> current PPM: -21 cumulative PPM: 0
+real sample rate: <span class="m">2400030</span> current PPM: <span class="m">13</span> cumulative PPM: 1
+real sample rate: <span class="m">2400010</span> current PPM: <span class="m">5</span> cumulative PPM: 1
+real sample rate: <span class="m">2399982</span> current PPM: -7 cumulative PPM: 1
+real sample rate: <span class="m">2400030</span> current PPM: <span class="m">13</span> cumulative PPM: 1
+real sample rate: <span class="m">2399995</span> current PPM: -2 cumulative PPM: 1
+real sample rate: <span class="m">2400004</span> current PPM: <span class="m">2</span> cumulative PPM: 1
+real sample rate: <span class="m">2400019</span> current PPM: <span class="m">8</span> cumulative PPM: 1
+real sample rate: <span class="m">2399954</span> current PPM: -19 cumulative PPM: 1
+real sample rate: <span class="m">2400013</span> current PPM: <span class="m">5</span> cumulative PPM: 1
+</pre></div>
+
+
+<!---   real sample rate: 2400012 current PPM: 5 cumulative PPM: 1
+    real sample rate: 2400003 current PPM: 1 cumulative PPM: 1
+    real sample rate: 2400013 current PPM: 6 cumulative PPM: 1
+    real sample rate: 2400004 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2399978 current PPM: -9 cumulative PPM: 1
+    real sample rate: 2400002 current PPM: 1 cumulative PPM: 1
+    real sample rate: 2400029 current PPM: 12 cumulative PPM: 1
+    real sample rate: 2399986 current PPM: -6 cumulative PPM: 1
+    real sample rate: 2399996 current PPM: -1 cumulative PPM: 1
+    real sample rate: 2400014 current PPM: 6 cumulative PPM: 1
+    real sample rate: 2399992 current PPM: -3 cumulative PPM: 1
+    real sample rate: 2400019 current PPM: 8 cumulative PPM: 1
+    real sample rate: 2399971 current PPM: -12 cumulative PPM: 1
+    real sample rate: 2400010 current PPM: 4 cumulative PPM: 1
+    real sample rate: 2400001 current PPM: 0 cumulative PPM: 1
+    real sample rate: 2400011 current PPM: 5 cumulative PPM: 1
+    real sample rate: 2400038 current PPM: 16 cumulative PPM: 1
+    real sample rate: 2399927 current PPM: -30 cumulative PPM: 1
+    real sample rate: 2400016 current PPM: 7 cumulative PPM: 1
+    real sample rate: 2400005 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2400005 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2400012 current PPM: 5 cumulative PPM: 1
+    real sample rate: 2399996 current PPM: -1 cumulative PPM: 1
+    real sample rate: 2400059 current PPM: 25 cumulative PPM: 1
+    real sample rate: 2399902 current PPM: -41 cumulative PPM: 0
+    real sample rate: 2400034 current PPM: 14 cumulative PPM: 1
+    real sample rate: 2400005 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2400003 current PPM: 1 cumulative PPM: 1
+    real sample rate: 2400007 current PPM: 3 cumulative PPM: 1
+    real sample rate: 2399998 current PPM: -1 cumulative PPM: 1
+    real sample rate: 2399985 current PPM: -6 cumulative PPM: 1
+    real sample rate: 2400005 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2400005 current PPM: 2 cumulative PPM: 1
+    real sample rate: 2400006 current PPM: 3 cumulative PPM: 1
+--->
+
+<p>I should mention that I get no <span class="caps">PPM</span> reports from running rtl_test under windows and again I&#8217;m not sure&nbsp;why&#8230;</p>
+<h2>rtl_fm</h2>
+<p>rtl_fm is a very resource efficient command line tool to capture <span class="caps">IQ</span> samples from the <span class="caps">RTL</span>-<span class="caps">SDR</span> and demodulate <span class="caps">FM</span>, <span class="caps">AM</span> and <span class="caps">SSB</span> signals. For more information on this program make sure to check the <a href="http://kmkeen.com/rtl-demod-guide/">rtl_fm guide</a>.</p>
+<p>The following command will demodulate and record a wideband <span class="caps">FM</span> channel at 97.4 MHz and record it in a file <em>comercial.raw</em>. You can press Ctrl+C to exit after capturing enough&nbsp;samples.</p>
+<div class="highlight"><pre><span></span>$ rtl_fm -M wbfm -f 97.4M -g <span class="m">20</span> comercial.raw
+</pre></div>
+
+
+<p>The meaning of the options&nbsp;is:</p>
+<ul>
+<li><strong>-M wbfm</strong>: wideband <span class="caps">FM</span>&nbsp;modulation;</li>
+<li><strong>-f 97.4M</strong>: center frequency of 97.4&nbsp;MHz;</li>
+<li><strong>-g 20</strong>: sets the tuner gain to the closest allowable value to 20 dB (19.7 dB). Without this option present automatic gain is&nbsp;used.</li>
+</ul>
+<p>when using -M wbfm a few implicit options are assumed (which can be explicitely&nbsp;overriden):</p>
+<ul>
+<li><strong>-s 170k</strong>: for wideband <span class="caps">FM</span> a sample rate of 170 kHz is chosen by&nbsp;default;</li>
+<li><strong>-A fast</strong>: fast polynomial approximation of arctangent used in&nbsp;demodulation;</li>
+<li><strong>-r 32k</strong>: output is decimated to 32&nbsp;kHz;</li>
+<li><strong>-l 0</strong>: disables&nbsp;squelch;</li>
+<li><strong>-E deemp</strong>: applies a deemphesis&nbsp;filter.</li>
+</ul>
+<p>The output I get running this command and then stopping the execution after a few seconds&nbsp;is:</p>
+<div class="highlight"><pre><span></span>Found <span class="m">1</span> device<span class="o">(</span>s<span class="o">)</span>:
+  0:  Realtek, RTL2838UHIDIR, SN: 00000001
+
+Using device 0: Generic RTL2832U OEM
+Found Rafael Micro R820T tuner
+Tuner gain <span class="nb">set</span> to 19.70 dB.
+Tuned to <span class="m">97671000</span> Hz.
+Oversampling input by: 6x.
+Oversampling output by: 1x.
+Buffer size: 8.03ms
+Exact sample rate is: 1020000.026345 Hz
+Sampling at <span class="m">1020000</span> S/s.
+Output at <span class="m">170000</span> Hz.
+Signal caught, exiting!
+</pre></div>
+
+
+<p>You might notice that rtl_fm tuned to a different frequency (97.671 MHz) than that we specified (97.4 MHz). This is done to avoid the <span class="caps">DC</span> bias that is present in dongles with Zero-<span class="caps">IF</span> tuners such as the e4000. This way the dongle is tuned to a slightly different frequency in order to avoid the <span class="caps">DC</span> spike and the software later corrects for this in the digital signal processing by shifting the captured signal in frequency to 0 Hz. While this shouldn&#8217;t be necessary for <span class="caps">R820T</span> tuners one might argue that it&#8217;s still justified in case there is any significant flicker noise (1/f psd) or higher power law noises present at the&nbsp;output.</p>
+<p>Notice also that the software oversamples by 6x at 1.02 MHz and then decimates the output to the (implicitely) specified frequency of 170 kHz before demodulating. This is because, first and foremost, 170 kHz is not a valid sampling frequency for the <span class="caps">RTL</span>-<span class="caps">SDR</span> (see the librtlsdr section above for the valid range). 1.02 MHz is in fact the first integer multiple of 170 kHz that fits in the allowed range. But this is not the only reason; in fact if we specifically ask rtl_fm to sample the input at 240 kHZ with <strong>-s 240k</strong>, it will still oversample by 5x at 1.2 MHz despite the fact that 240 MHz is within the allowed range of sampling frequencies of the <span class="caps">RTL</span> <span class="caps">SDR</span>:</p>
+<div class="highlight"><pre><span></span>Oversampling input by: 5x.
+Oversampling output by: 1x.
+Buffer size: 6.83ms
+Sampling at <span class="m">1200000</span> S/s.
+Output at <span class="m">240000</span> Hz.
+</pre></div>
+
+
+<p>My assumption is that this is done in order to mitigate the quantization noise. Recall that the output of the <span class="caps">RTL</span>-<span class="caps">SDR</span> is 8 bits and therefore oversampling and decimating in software where we&#8217;re not limited to 8 bits should provide a better noise figure than relying on doing the decimation in the chip. Furthermore, it provides greater control over the decimation process, letting the software choose the low-pass filter. From these considerations it would make sense to always use the highest possible sampling rate but rtl_fm is built with limited resources in mind so that might provide a reason for it compromising for sampling frequencies closer to 1&nbsp;MHz.</p>
+<p>rtl_fm stores the raw audio in a file as signed 16 bits integers. To load it in python with numpy you can therefore&nbsp;do:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="n">raw_audio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="s2">&quot;comercial.raw&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+</pre></div>
+
+
+<p>To listen to it you can always use scipy to store it as a .wav file and then play it in your favourite media&nbsp;player:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.io</span> <span class="kn">import</span> <span class="n">wavfile</span>
+
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;comercial.wav&quot;</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="mi">32000</span><span class="p">,</span> <span class="n">raw_audio</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Recall that the default output rate of rtl_fm in wideband <span class="caps">FM</span> mode is 32 kHz but if you changed that with the -r option make sure to provide wavfile.write with the correct one (and that it is within the allowed range of your sound&nbsp;card&#8230;).</p>
+<p><div class="audio-container"><audio controls><source src="/audio/comercial.wav" type="audio/wav">Your browser does not support the audio element.</audio></div></p>
+<p>Alternativelly you could install and use <a href="http://sox.sourceforge.net/">SoX</a> which is a great program to convert audio files between formats (including raw audio signals), as well as playing and recording them. The following command will play the raw audio file with sample rate 32 kHz, 16 bits signed int encoding and 1 channel on my windows&nbsp;machine:</p>
+<div class="highlight"><pre><span></span>$ sox -r 32k -t raw -e signed -b <span class="m">16</span> -c <span class="m">1</span> comercial.raw -t waveaudio
+</pre></div>
+
+
+<p>You can replace &#8220;-t waveaudio&#8221; with a .wav filename to store it in a wav file instead. Make sure to refer to <a href="http://sox.sourceforge.net/sox.html">SoX&#8217;s documentation</a> for a full description of the options&nbsp;available.</p>
+<h2>rtl_sdr</h2>
+<p>Finally, the most general use command line tool in the rtl-sdr package is rtl_sdr. This program will let you capture <span class="caps">IQ</span> samples directly and store them in a file (or pipe them into some other command line&nbsp;application):</p>
+<div class="highlight"><pre><span></span>$ rtl_sdr -f <span class="m">97400000</span> -g <span class="m">20</span> -s <span class="m">2400000</span> -n <span class="m">24000000</span> comercial_s2m4_g20.dat
+</pre></div>
+
+
+<p>The options in this case&nbsp;mean:</p>
+<ul>
+<li><strong>-f 97400000</strong>: sets the tuner frequency to 97.4&nbsp;MHz;</li>
+<li><strong>-g 20</strong>: sets the tuner gain to the closest allowable value to 20 dB (19.7&nbsp;dB);</li>
+<li><strong>-s 2400000</strong>: sets the sample rate to 2.4&nbsp;MHz;</li>
+<li><strong>-n 24000000</strong>: instructs rtl_sdr to capture 2.4e7 samples which should amount to a 10 seconds worth of samples at the given sample rate (10 s * 2.4e6&nbsp;MHz).</li>
+</ul>
+<p>This utility stores the I and Q samples alternately as 8 bits unsigned integers. In order to load them in python we can therefore use something&nbsp;like:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">load_iq</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">(</span><span class="o">-</span><span class="mi">127</span><span class="p">)</span> <span class="c1">#adding a signed int8 to an unsigned one results in an int16 array</span>
+    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>    <span class="c1">#we cast it back to an int8 array and reshape</span>
+</pre></div>
+
+
+<p>This will load the file and return an numpy.int8 numpy array with shape (nsamples, 2), the first column corresponding to I samples and the second to Q&nbsp;samples.</p>
+<p>A more convenient format to process the data digitally is to load it as complex samples (I + j*Q). Unfortunately numpy doesn&#8217;t have a complex integer type so we&#8217;ll have to incur in a bit of memory overhead and spring for a numpy.complex64 array which makes it less useful when dealing with a large number of&nbsp;samples:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">load_iq_complex</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">(</span><span class="mf">127.5</span><span class="p">)</span> <span class="c1">#by subtracting a float32 the resulting array will also be float32</span>
+    <span class="k">return</span> <span class="mf">8e-3</span><span class="o">*</span><span class="n">x</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>                        <span class="c1">#viewing it as a complex64 array then yields the correct result</span>
+</pre></div>
+
+
+<h1></h1>
+<h1>pyrtlsdr</h1>
+<p><a href="https://github.com/roger-/pyrtlsdr">pyrtlsdr</a> is a python library that wraps the rtlsdr.dll library functions and provides you an object oriented <span class="caps">API</span> to access them. You can install it using pip since I&#8217; don&#8217;t think it&#8217;s available through conda. You also need to make sure that the rtlsdr.dll is in your python path. If you don&#8217;t want to edit it on windows you can always just drop a copy of the necessary dlls into your working&nbsp;folder&#8230;</p>
+<p>If you want you can access directly the librtlsdr wrapper functions through importing the librtlsdr submodule. You&#8217;ll have to initialize a pointer to the device that you then pass to all the librtlsdr functions. In order to open an rtl-sdr device for instance you could&nbsp;do:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rtlsdr.librtlsdr</span> <span class="kn">import</span> <span class="n">librtlsdr</span><span class="p">,</span> <span class="n">p_rtlsdr_dev</span>
+
+<span class="n">dev_p</span> <span class="o">=</span> <span class="n">p_rtlsdr_dev</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>             <span class="c1">#the device pointer</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">librtlsdr</span><span class="o">.</span><span class="n">rtlsdr_open</span><span class="p">(</span><span class="n">dev_p</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1">#opens device at index 0</span>
+                                   <span class="c1">#returns an integer &lt; 0 on error</span>
+</pre></div>
+
+
+<p>This is however not the intended use of the library. It defines a much more convenient RtlSdr class which stores the device pointer (and a few other useful variables) and wraps all the functions as methods so that a much more pythonic <span class="caps">API</span> is exposed. Most of these methods will have the same name as the original librtlsdr function minus the <em>rtlsdr_</em> prefix (a notable exception being the methods to read the samples). It also defines a few notable properties that can be used to call the get/set methods in a more idiomatic&nbsp;way:</p>
+<ul>
+<li>center_freq;</li>
+<li>sample_rate;</li>
+<li>gain;</li>
+<li>freq_correction;</li>
+<li>bandwidth.</li>
+</ul>
+<p>To collect 10 seconds of data with the same characteristics as that we collected with rtl_sdr we would&nbsp;do:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">rtlsdr</span> <span class="kn">import</span> <span class="n">RtlSdr</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
+
+<span class="c1">#we use a context manager that automatically calls .close() on sdr</span>
+<span class="c1">#whether the code block finishes successfully or an error occurs</span>
+<span class="c1">#initializing a RtlSdr instance automatically calls open()</span>
+<span class="k">with</span> <span class="n">closing</span><span class="p">(</span><span class="n">RtlSdr</span><span class="p">())</span> <span class="k">as</span> <span class="n">sdr</span><span class="p">:</span>  
+    <span class="n">sdr</span><span class="o">.</span><span class="n">sample_rate</span> <span class="o">=</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="mi">2400000</span>
+    <span class="n">sdr</span><span class="o">.</span><span class="n">center_freq</span> <span class="o">=</span> <span class="mf">97.4e6</span>
+    <span class="n">sdr</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">iq_samples</span> <span class="o">=</span> <span class="n">sdr</span><span class="o">.</span><span class="n">read_samples</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="n">sample_rate</span><span class="p">)</span>
+</pre></div>
+
+
+<h1></h1>
+<h1>Demodulating <span class="caps">FM</span></h1>
+<p>Armed with our new found knowledge of how to capture <span class="caps">IQ</span> samples and load them into python we can finally get working on demodulating <span class="caps">FM</span> signals. We will first plot the Welch power spectral density (<span class="caps">PSD</span>) estimate of the complex baseband representation obtained in either of the two previous&nbsp;sections:</p>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">signal</span>
+<span class="kn">from</span> <span class="nn">scipy.fftpack</span> <span class="kn">import</span> <span class="n">fftshift</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="c1">#compute Welch estimate without detrending</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">Pxx</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">welch</span><span class="p">(</span><span class="n">iq_samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">,</span> <span class="n">detrend</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">f</span><span class="p">,</span> <span class="n">Pxx</span> <span class="o">=</span> <span class="n">fftshift</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="n">fftshift</span><span class="p">(</span><span class="n">Pxx</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">semilogy</span><span class="p">(</span><span class="n">f</span><span class="o">/</span><span class="mf">1e3</span><span class="p">,</span> <span class="n">Pxx</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;f [kHz]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;PSD [Power/Hz]&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">sample_rate</span><span class="o">/</span><span class="mf">2e3</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">/</span><span class="mf">2e3</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="n">sample_rate</span><span class="o">/</span><span class="mf">2e3</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">/</span><span class="mf">2e3</span><span class="p">)</span>
+</pre></div>
+
+
+<p><img alt="Whole spectrum" src="http://ajoo.blog/images/pwelch_whole.png"></p>
+<p>The first thing you should notice is that I have massively oversampled the <span class="caps">FM</span> signal. Recall that at a sample rate of 2.4 MHz we&#8217;re seeing a portion of the spectrum ranging from 97.4 MHz +- 1.2 MHz. The bandwidth of a comercial <span class="caps">FM</span> radio station however is usually around 200 kHz and the two peaks to the left and right of the main one are actually 2 different stations with a weaker&nbsp;signal.</p>
+<p>Oversampling the signal we want has an advantage which I touched upon in the rtl_fm section but I&#8217;ll reiterate here. Because the <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">ADC</span> is 8 bit there will be significant quantization noise. Oversampling and decimating in software where the 8-bit limitation doesn&#8217;t exist should yield a better <span class="caps">SNR</span> figure. I assume that this is the reason that <span class="caps">SDR</span># also samples at 2.4 MHz by default when listening to <span class="caps">FM</span>.</p>
+<p>As to the other stations, we could have gotten rid of them by setting our <span class="caps">IF</span> filter bandwidth smaller. It was automatically set by the driver at 2.4 MHz when we set the sample rate and I chose not to manually set it lower because I wanted these other signals to show up in order to illustrate a point further along. Adjusting your <span class="caps">IF</span> filter to the bandwidth of the signal you&#8217;re interested in when oversampling is probably a good idea since more selectivity is always&nbsp;good.</p>
+<p>We&#8217;re now ready to decimate the signal down to a more manageable rate of 240 kHz which is a bit more than the bandwidth of the signal we&#8217;re interested in but makes the decimation math simpler. We&#8217;ll let the decimation filter take care of the unwanted stations and out of band&nbsp;noise:</p>
+<div class="highlight"><pre><span></span><span class="n">sample_rate_fm</span> <span class="o">=</span> <span class="mi">240000</span>                       <span class="c1">#decimate by 10</span>
+<span class="n">iq_comercial</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span><span class="n">iq_samples</span><span class="p">,</span> <span class="n">sample_rate</span><span class="o">//</span><span class="n">sample_rate_fm</span><span class="p">)</span>
+</pre></div>
+
+
+<p>As you can see the <span class="caps">PSD</span> estimate now contains only the signal of interest which is the broadcast by <span class="caps">FM</span> station Rádio&nbsp;Comercial:</p>
+<p><img alt="Comercial spectrum" src="http://ajoo.blog/images/pwelch_comercial.png"></p>
+<p>We can now proceed with the demodulation. Going back to the <a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html#Frequency Demodulation">section on <span class="caps">FM</span> modulation</a> of the first part of this introduction we find that in order to demodulate an <span class="caps">FM</span> signal from it&#8217;s complex baseband representation, it suffices to differentiate the angle of the&nbsp;signal:</p>
+<div class="math">$$\frac{\text{d}\angle s_b(t)}{\text{d}t} = 2\pi f_\Delta m(t)$$</div>
+<p>In discrete-time this can be accomplished through a differentiating <span class="caps">FIR</span> filter. For the sake of simplicity we&#8217;ll use the simple forward difference <span class="math">\(\left(1-q^{-1}\right)\)</span> through numpy&#8217;s <em>diff</em>&nbsp;function:</p>
+<div class="highlight"><pre><span></span><span class="n">angle_comercial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">iq_comercial</span><span class="p">))</span>
+<span class="n">demodulated_comercial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">angle_comercial</span><span class="p">)</span>
+</pre></div>
+
+
+<p>We unwrap the result of the angle function to remove <span class="math">\(2\pi\)</span> discontinuities. Differentiating this angle then yields the desired result with one caveat, the sample rate of the signal is too high for the typical sound card (and effectivelly our ears which in the best of cases can pick up to 20 kHz). A further decimation is thus necessary to bring the signal down to a sample rate that our sound cards can reproduce. 48 kHz is a good value for this as it is supported by most sound&nbsp;cards:</p>
+<div class="highlight"><pre><span></span><span class="n">audio_rate</span> <span class="o">=</span> <span class="mi">48000</span>
+<span class="n">audio_comercial</span> <span class="o">=</span> <span class="n">signal</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span><span class="n">demodulated_comercial</span><span class="p">,</span> \
+    <span class="n">sample_rate_fm</span><span class="o">//</span><span class="n">audio_rate</span><span class="p">,</span> <span class="n">zero_phase</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The following is the final result after converting to a 16-bit per sample wav file (for the sake of some compression since 16-bit is more than necessary for a decent audio&nbsp;quality):</p>
+<div class="highlight"><pre><span></span><span class="n">audio_comercial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">(</span><span class="mf">1e4</span><span class="o">*</span><span class="n">audio_comercial</span><span class="p">)</span>
+<span class="n">wavfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;comercial_demodulated.wav&quot;</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">audio_rate</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">audio_comercial</span><span class="p">)</span>
+</pre></div>
+
+
+<p><div class="audio-container"><audio controls><source src="/audio/comercial_demodulated.wav" type="audio/wav">Your browser does not support the audio element.</audio></div></p>
+<h2>Tuning to a Different&nbsp;Station</h2>
+<p>The interesting thing about <span class="caps">SDR</span> is that we can do anything with the captured signal. Since we oversampled the signal so much that we actually picked up additional <span class="caps">FM</span> broadcasts we can tune into these in software and see if they yield something more&nbsp;interesting.</p>
+<p>Recall that multiplying by a complex sinusoid correspondes to circularly shifting the spectrum of the digital signal by that sinusoid&#8217;s&nbsp;frequency:</p>
+<div class="math">$$e^{j\omega_0n}x[n]\stackrel{\mathrm{DFT}}{\longleftrightarrow}X\left(e^{j(\omega+\omega_0)}\right)
+$$</div>
+<p>We can use this to center the station 800 kHz to the left of Rádio Comercial which is the frequency for Smooth <span class="caps">FM</span> (96.6 MHz). All we need to do is multiply our complex baseband samples by <span class="math">\(e^{j\frac{2\pi}{3}n}\)</span> since <span class="math">\(1/3\)</span> is the required normalized frequency (<span class="math">\(\frac{800\;kHz}{f_s}\)</span>):</p>
+<div class="highlight"><pre><span></span><span class="n">f_shift</span> <span class="o">=</span> <span class="mi">800000</span>
+<span class="n">iq_shifted</span> <span class="o">=</span> <span class="n">iq_samples</span><span class="o">*</span>\
+    <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="mi">1j</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f_shift</span><span class="o">/</span><span class="n">sample_rate</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">iq_samples</span><span class="p">)))</span>
+</pre></div>
+
+
+<p>We can then decimate the resulting signal in order to obtain the complex baseband representation of the <span class="caps">FM</span> broadcast of Smooth <span class="caps">FM</span> in the same fashion as we did for Rádio Comercial. The <span class="caps">PSD</span> estimate of the 3 signals is depicted next for&nbsp;comparison:</p>
+<p><img alt="Comercial spectrum" src="http://ajoo.blog/images/pwelch_smooth.png"></p>
+<p>Demodulation can then be done in the same way yielding the following&nbsp;result:</p>
+<p><div class="audio-container"><audio controls><source src="/audio/smooth_demodulated.wav" type="audio/wav">Your browser does not support the audio element.</audio></div></p>
+<p>We can see that this example is a bit noisier owing to the roughly 100-fold less power of the received signal. However it&#8217;s pretty much still audible which only speaks to the frequency modulation&#8217;s noise&nbsp;tolerance.</p>
+<p>What we&#8217;ve done here is essentially another digital downconversion similar to the one done inside the <span class="caps">RTL2832U</span> to get from <span class="caps">IF</span> to baseband. We now know how to easily perform these frequency shifts in software and the same principle can be applied for different purposes such as performing a frequency correction directly in software or tuning the <span class="caps">RTL</span>-<span class="caps">SDR</span> a bit off-frequency to avoid a possible <span class="caps">DC</span> spike and then correct for this in software like rtl_fm&nbsp;does.</p>
+<!&#8212;-[DSP Tricks](http://www.embedded.com/design/configurable-systems/4212086/DSP-Tricks&#8212;Frequency-demodulation-algorithms-)&#8212;->
+
+<h1>Up&nbsp;Next</h1>
+<p>My next posts will be an introduction to <span class="caps">GNU</span> radio where I&#8217;ll demodulate <span class="caps">FM</span> signals in real time and another which will provide a brief overview to the <span class="caps">GPS</span> system and sampling of <span class="caps">GPS</span> L1 signals. Stay&nbsp;tuned!</p>
+<script type="text/javascript">if (!document.getElementById('mathjaxscript_pelican_#%@#$@#')) {
+    var align = "center",
+        indent = "0em",
+        linebreak = "false";
+
+    if (false) {
+        align = (screen.width < 768) ? "left" : align;
+        indent = (screen.width < 768) ? "0em" : indent;
+        linebreak = (screen.width < 768) ? 'true' : linebreak;
+    }
+
+    var mathjaxscript = document.createElement('script');
+    var location_protocol = (false) ? 'https' : document.location.protocol;
+    if (location_protocol !== 'http' && location_protocol !== 'https') location_protocol = 'https:';
+    mathjaxscript.id = 'mathjaxscript_pelican_#%@#$@#';
+    mathjaxscript.type = 'text/javascript';
+    mathjaxscript.src = location_protocol + '//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML';
+    mathjaxscript[(window.opera ? "innerHTML" : "text")] =
+        "MathJax.Hub.Config({" +
+        "    config: ['MMLorHTML.js']," +
+        "    TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } }," +
+        "    jax: ['input/TeX','input/MathML','output/HTML-CSS']," +
+        "    extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']," +
+        "    displayAlign: '"+ align +"'," +
+        "    displayIndent: '"+ indent +"'," +
+        "    showMathMenu: true," +
+        "    messageStyle: 'normal'," +
+        "    tex2jax: { " +
+        "        inlineMath: [ ['\\\\(','\\\\)'] ], " +
+        "        displayMath: [ ['$$','$$'] ]," +
+        "        processEscapes: true," +
+        "        preview: 'TeX'," +
+        "    }, " +
+        "    'HTML-CSS': { " +
+        "        styles: { '.MathJax_Display, .MathJax .mo, .MathJax .mi, .MathJax .mn': {color: 'inherit ! important'} }," +
+        "        linebreaks: { automatic: "+ linebreak +", width: '90% container' }," +
+        "    }, " +
+        "}); " +
+        "if ('default' !== 'default') {" +
+            "MathJax.Hub.Register.StartupHook('HTML-CSS Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax['HTML-CSS'].FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+            "MathJax.Hub.Register.StartupHook('SVG Jax Ready',function () {" +
+                "var VARIANT = MathJax.OutputJax.SVG.FONTDATA.VARIANT;" +
+                "VARIANT['normal'].fonts.unshift('MathJax_default');" +
+                "VARIANT['bold'].fonts.unshift('MathJax_default-bold');" +
+                "VARIANT['italic'].fonts.unshift('MathJax_default-italic');" +
+                "VARIANT['-tex-mathit'].fonts.unshift('MathJax_default-italic');" +
+            "});" +
+        "}";
+    (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
+}
+</script><p><a href="http://ajoo.blog/intro-to-rtl-sdr-part-ii-software.html#disqus_thread">comments</a></p>                </article>
+            </aside><!-- /#featured -->
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <ol id="posts-list" class="hfeed">
+
+            <li><article class="hentry">
+                <header>
+                    <h1><a href="http://ajoo.blog/software-defined-gnss.html" rel="bookmark"
+                           title="Permalink to Software Defined GNSS">Software Defined <span class="caps">GNSS</span></a></h1>
+                </header>
+
+                <div class="entry-content">
 <footer class="post-info">
         <span>Sun 18 December 2016</span>
 <span>| tags: <a href="http://ajoo.blog/tag/gnss.html">GNSS</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a><a href="http://ajoo.blog/tag/python.html">Python</a></span>
-</footer><!-- /.post-info --><p>When I first heard about Software Defined Radios (<span class="caps">SDR</span>) I was instantly hooked. The ability to probe the electromagnetic spectrum around me and decode the ubiquitous signals being transmitted seemed to open a door to new and interesting experiments. I loved Digital Signal Processing (<span class="caps">DSP</span>) when I was in college (still do) and this was exactly what I was looking for to put it in practice. I started looking for a project to sink my teeth in that went besides using established software and a cheap <span class="caps">SDR</span> to decode well known <span class="caps">AM</span>, <span class="caps">FM</span> and <span class="caps">ADS</span>-B&nbsp;signals.</p>
-<p>Since my main background is in Guidance, Navigation and Control (and I&#8217;m a person walking this Earth in 2016) I&#8217;ve made use of <span class="caps">GPS</span> before and I&#8217;m familiar to some extent with its inner workings from a course in Global Navigation Satellite Systems (<span class="caps">GNSS</span>) I attended in college. I&#8217;ve always felt however that my knowledge of this system is not as deep as I want it to be, particularly regarding the receiver side of things. I think it&#8217;s therefore appropriate that my first foray into the exciting world of <span class="caps">SDR</span> be the implementation of a <span class="caps">GPS</span>/<span class="caps">GNSS</span> receiver in software. I intend to take this as far as I can, from measuring <span class="caps">GPS</span> L1 signals to computing a full navigation solution of position and velocity, learning as much as I can along the way and sharing it with any interested&nbsp;readers.</p>
-<p>My particular goals for this project are&nbsp;therefore:</p>
-<ol>
-<li>To put my knowledge of <span class="caps">GNSS</span>, telecommunications and <span class="caps">DSP</span> to work in a practical setting and keep me from getting&nbsp;rusty;</li>
-<li>To fill in the blanks in my knowledge of <span class="caps">GNSS</span> receivers&#8217; inner&nbsp;workings;</li>
-<li>To learn about new software libraries and tools, in particular those concerning real time digital signal&nbsp;processing;</li>
-<li>To improve my communication and documentation&nbsp;skills.</li>
-</ol>
-<h1></h1>
-<h1>Materials</h1>
-<p>There are only two components (three if you&#8217;re counting a decent computer/laptop) required for this project. One is an active <span class="caps">GPS</span> Antenna in order to be able to receive <span class="caps">GPS</span> signals in the L1 band (1575.42 MHz center frequency) and the other is a Software Defined Radio (<span class="caps">SDR</span>) which is responsible for delivering to your computer the digital samples of these signals shifted to&nbsp;baseband.</p>
-<p>I will go into further detail into the hardware in my next blog post so don&#8217;t worry if you don&#8217;t understand what this is for just yet. This section is only meant to give you an idea of what you&#8217;ll need and the costs associated. The particular choices I made&nbsp;are:</p>
-<ul>
-<li><a href="https://www.amazon.com/RTL-SDR-Blog-RTL2832U-Software-Telescopic/dp/B011HVUEME/ref=lp_10230687011_1_1?srs=10230687011&amp;ie=UTF8&amp;qid=1482078660&amp;sr=8-1"><span class="caps">RTL</span>-<span class="caps">SDR</span> Blog <span class="caps">USB</span> Dongle</a> (€26) I chose this over other generic <span class="caps">USB</span> <span class="caps">DVB</span>-T <span class="caps">TV</span> dongles because it has a software enabled bias-T which allows me to power an active antenna without additional hardware or soldering mods. It also has other nice enhancements over regular dongles for use in Software Defined Radio and an <span class="caps">SMA</span> antenna connector instead of the more common <span class="caps">MCX</span> which is great since we won&#8217;t need additional parts to plug in our <span class="caps">GPS</span> antenna. You could also get the version without the two telescopic antennas which comes out cheaper (€20) since we&#8217;re mostly interested in using a <span class="caps">GPS</span>&nbsp;antenna.</li>
-<li><a href="https://www.amazon.com/Waterproof-Active-Antenna-28dB-Gain/dp/B00LXRQY9A/ref=lp_10008493011_1_1?srs=10008493011&amp;ie=UTF8&amp;qid=1482079461&amp;sr=8-1"><span class="caps">GPS</span> Active Antenna</a> (€15) Any active <span class="caps">GPS</span> antenna should do, there are plenty available at Amazon and other specialized&nbsp;sellers.</li>
-</ul>
-<p>Below is a picture I took of the <span class="caps">USB</span> dongle and the <span class="caps">GPS</span> antenna with a 2 Euro coin for&nbsp;scale:</p>
-<p><img alt="RTL Dongle and GPS Antenna" src="http://ajoo.blog/images/RTL_dongle_and_GPS_antenna.jpg"></p>
-<h1>Software</h1>
-<p>Software based <span class="caps">GNSS</span> receivers are hardly uncharted waters. There are full fledged software libraries meant to accomplish what this little project of mine set out to do. Below is a list of those I&#8217;m aware&nbsp;of:</p>
-<ul>
-<li><a href="https://github.com/taroz/GNSS-SDRLIB">gnss-sdrlib</a> An open source <span class="caps">GNSS</span> Software Defined Radio Library with nice <span class="caps">GUI</span> elements written in C and&nbsp;C++</li>
-<li><a href="http://gnss-sdr.org">gnss-sdr</a> An open source library for implementing <span class="caps">GNSS</span> software defined receivers in C++. Based on <span class="caps">GNU</span>&nbsp;Radio.</li>
-<li><a href="http://www.rtklib.com/">rtklib</a> An open source program package for <span class="caps">GNSS</span>&nbsp;positioning</li>
-</ul>
-<p>I will not rely on these libraries except maybe for inspiration and test purposes as this project is meant mostly as an educational experience for myself and for any readers out there. I will attempt to make my posts as informative and as self-contained as possible so that I can refer back to them in the future and so that any reader might follow along and understand how to decode <span class="caps">GNSS</span> signals without having to refer to external materials. I will assume only basic knowledge of telecommunications, specially regarding the use of Fourier transforms and time &lt;-&gt; frequency representation of signals but no previous knowledge of <span class="caps">GNSS</span>.</p>
-<p>That being said, here are the major pieces of software that I do plan on&nbsp;using:</p>
-<ul>
-<li><a href="https://www.continuum.io/downloads">Python</a> It&#8217;s my language of choice for anything data science and scientific computing these days. It&#8217;s open source unlike <span class="caps">MATLAB</span>, which is the other big workhorse in my scientific computing toolbox, and that makes it much more appropriate for this series. My choice of distribution is Anaconda which I&#8217;ve been using for a long time and can personaly vouch for. It comes packed with all the scientific libraries you&#8217;ll likely need for this little&nbsp;project;</li>
-<li><a href="http://gnuradio.org/"><span class="caps">GNU</span> Radio</a> An open-source toolkit for <span class="caps">SDR</span>. Essentially a real-time capable <span class="caps">DSP</span> library that can be used in python and C++. I&#8217;m planing to use this in order to be able to decode <span class="caps">GPS</span> signals in real time while I&#8217;ll probably stick with the numpy and scipy python libraries for offline processing of collected data. The fact that there is an open source <span class="caps">SDR</span> <span class="caps">GNSS</span> library that&#8217;s built on top of it leaves me hopeful that it is adequate for my&nbsp;purposes.</li>
-</ul>
-<p>Keep in mind that these is only what I <em>intend</em> to use before diving in head first into this project. If at any point they feel inadequate I&#8217;ll have reconsider my choices in order to push the project forward towards my end goals. For one, I&#8217;ll probably have to delve into some C++ coding further on in order to implement functionality non existant in <span class="caps">GNU</span> Radio&#8217;s base&nbsp;distribution.</p>
-<h1>Related&nbsp;Endeavours</h1>
-<p>While researching this topic I found a <a href="http://sdrgps.blogspot.com">blog by Philip Hahn</a> detailing his experiments with software defined radio <span class="caps">GPS</span> and its use in high-power rockets. It should be an interesting read for anyone interested in this&nbsp;topic.</p>
-<p>Another very interesting <a href="http://lea.hamradio.si/~s53mv/navsats/theory.html">website</a> I came across on HackerNews documents the construction of a more conventional homemade <span class="caps">GPS</span>/<span class="caps">GLONASS</span> receiver by Matjaz Vidmar. It pretty much embodies what I hope to achieve with this series except with a lot less fiddling with physical hardware. While searching for the previous link after &#8220;misplacing&#8221; the bookmark I also stumbled upon a similar <a href="http://www.aholme.co.uk/GPS/Main.htm">project by Andrew Holme</a> that uses an <span class="caps">FPGA</span> to do a lot of <span class="caps">DSP</span> heavy&nbsp;lifting.</p>
-<h1>Up&nbsp;Next</h1>
-<p>My next post in this series will go into detail into what exactly is Software Defined Radio and the particular hardware and software that will be used in this project. Stay&nbsp;tuned!</p><p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </article>
+</footer><!-- /.post-info -->                <p>A short introduction to my Software Defined <span class="caps">GNSS</span>&nbsp;project</p>
+                <a class="readmore" href="http://ajoo.blog/software-defined-gnss.html">read more</a>
+<p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
+            </article></li>
+            </ol><!-- /#posts-list -->
 <p class="paginator">
     Page 1 / 1
 </p>
-            </aside><!-- /#featured -->
-            </ol><!-- /#posts-list -->
             </section><!-- /#content -->
         <section id="extras" class="body">
-                <div class="blogroll">
-                        <h2>blogroll</h2>
-                        <ul>
-                            <li><a href="mailto:ajoo@outlook.pt">email</a></li>
-                            <li><a href="https://www.kaggle.com/ajoo88">kaggle</a></li>
-                        </ul>
-                </div><!-- /.blogroll -->
                 <div class="social">
                         <h2>social</h2>
                         <ul>
                             <li><a href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
 
                             <li><a href="https://github.com/Ajoo">github</a></li>
+                            <li><a href="mailto:ajoo@outlook.pt">email</a></li>
                         </ul>
                 </div><!-- /.social -->
         </section><!-- /#extras -->
 
         <footer id="contentinfo" class="body">
-                <p>Powered by <a href="http://getpelican.com/">Pelican</a>. Theme <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
+                <p>© 2017 ajoo.blog. All rights reserved. Powered by <a href="http://getpelican.com/">Pelican</a>. Theme is a fork of <a href="https://github.com/blueicefield/pelican-blueidea/">blueidea</a>, inspired by the default theme.</p>
         </footer><!-- /#contentinfo -->
 
     <script type="text/javascript">

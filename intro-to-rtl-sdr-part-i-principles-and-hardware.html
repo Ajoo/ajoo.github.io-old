@@ -36,18 +36,11 @@
 <footer class="post-info">
         <span>Wed 25 January 2017</span>
 <span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
-</footer><!-- /.post-info -->      <!-- {% sourced_fig
-https://c2.staticflickr.com/4/3546/4599500082_93203ec261.jpg
-"K.W. Vanguard radio"
-"A vintage K.W. Vanguard radio. An iconic piece of equipment from a previous era of amateur radio enthusiasts. Image by Derek via"
-https://www.flickr.com/photos/xenoc/4599500082/ Flickr %} -->
-
-<p><div class="figure">
+</footer><!-- /.post-info -->      <p><div class="figure">
 	<img src="http://ajoo.blog/external_images/nesdr_mini_2.png" width="500" alt="NooElec RTL-SDR">
 	<p class="caption">NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. <a href=http://www.nooelec.com/store/sdr/sdr-receivers/nesdr-mini-rtl2832-r820t.html>Image&nbsp;source</a></p>
 </div></p>
-<p>The purpose of this two-part blog post is to introduce a small piece of equipment that is quickly becoming a staple of the modern radiofrequency enthusiast&#8217;s toolbox. A cheap and powerful device that allows one to digitally sample the electromagnetic spectrum at a wide range of frequencies and get the samples delivered to a personal computer via a convenient <span class="caps">USB</span>&nbsp;interface.</p>
-<p>Initially this two-part introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> was meant as a single blog post. I intended to first go through the theory and working principles of the hardware and then move on to the software that I plan to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span> projects. Finally, I intended to use this software to implement a simple <span class="caps">FM</span> demodulator in order to illustrate my points through a practical&nbsp;application.</p>
+<p>The purpose of this article is to introduce a small and cheap device that is quickly becoming a staple of the modern radiofrequency enthusiast&#8217;s toolbox. Initially this two-part introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> was meant as a single blog post. I intended to first go through the theory and working principles of the hardware and then move on to the software that I plan to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span> projects. Finally, I intended to use this software to implement a simple <span class="caps">FM</span> demodulator in order to illustrate my points through a practical&nbsp;application.</p>
 <p>The more I researched this topic however, the more things I found that I wanted to write about here and this post eventually grew to be too lengthy for a single serving. I wanted this first article to be quite in depth, especially regarding the inner workings of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles because I wanted to have a single point to refer back to on this matter, both for my sake and that of any readers out&nbsp;there.</p>
 <p>As such, in this first part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over some basic principles of telecommunications that I feel are essential in order to understand the working principles of <span class="caps">SDR</span> hardware. I will then describe the components that make up the <span class="caps">RTL</span>-<span class="caps">SDR</span> and explain their&nbsp;functioning. </p>
 <p>This means that this first part is mostly theoretical but I hope that doesn&#8217;t deter anyone from following along. If you&#8217;re not all that interested in understanding how everything works I guess that skipping the Innards of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles section should still provide a minimum working knowledge of <span class="caps">RTL</span>-<span class="caps">SDR</span> going forward. You can always refer back to this post if you need a more in depth understanding further along the&nbsp;path&#8230;</p>

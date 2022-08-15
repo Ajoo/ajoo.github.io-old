@@ -4,7 +4,7 @@
         <meta charset="utf-8" /> 	
 		<meta name="viewport" content="width=device-width">
         <title>Intro to RTL-SDR, Part I - Principles and Hardware</title>
-        <link rel="stylesheet" href="https://ajoo.blog/theme/css/main.css" />
+        <link rel="stylesheet" href="https://ajoo-github-blog-old.pages.dev/theme/css/main.css" />
         <link href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
 
         <!--[if IE]>
@@ -129,7 +129,7 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <p>Note that the term Software Defined Radio denotes the whole communication system including the antenna, any specialized hardware and the computer/embedded system running the <span class="caps">DSP</span>. In the following however we&#8217;ll (ab)use it by equating it with the hardware that is used to deliver the digital samples to a personal computer since that is the use case we&#8217;re interested&nbsp;in.</p>
 <h1>A Cheap <span class="caps">SDR</span></h1>
 <p>There are many general purpose commercially available SDRs, both receiver only and receiver/transceiver, but they&#8217;re rather expensive in general (&gt;€100 for <span class="caps">RX</span> and &gt;€300 for <span class="caps">RX</span>/<span class="caps">TX</span>). This is where <span class="caps">DVB</span>-T <span class="caps">TV</span> tuner <span class="caps">USB</span> dongles based on the <span class="caps">RTL2832U</span> chipset come into play. As the name indicates, these cheap dongles (€10~€20) were meant for receiving <span class="caps">DVB</span>-T <span class="caps">TV</span> but hacked drivers from <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom</a> are able to turn them into wideband receiver only SDRs. This cheap <span class="caps">SDR</span> is therefore typically known as the <strong><span class="caps">RTL</span>-<span class="caps">SDR</span></strong>:</p>
-<p><img alt="RTL dongles" src="https://ajoo.blog/images/RTL_dongles.jpg"></p>
+<p><img alt="RTL dongles" src="https://ajoo-github-blog-old.pages.dev/images/RTL_dongles.jpg"></p>
 <p>Here you can see the two dongles I own. The one on top looks like a generic <span class="caps">DVB</span>-T <span class="caps">USB</span> dongle but it was tuned by NooElec for use as a <span class="caps">SDR</span>. You can see in the picture the remote that comes with it for its original intended use as a <span class="caps">TV</span> tuner. It has a standard <span class="caps">MCX</span> antenna connector and comes with a small whip&nbsp;antenna.</p>
 <p>The dongle that you see at the bottom is the one sold by the <a href="http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog</a>. It comes with several improvements over the generic dongles for use as a <span class="caps">SDR</span>. You can read all about these in the the webpage linked. For my intended use of capturing <span class="caps">GPS</span> signals I was mostly interested in the software enabled bias-T in order to power an active <span class="caps">GPS</span> antenna, the <span class="caps">SMA</span> antenna connector and of course the 1 <span class="caps">PPM</span> temperature controlled oscillator for more accurate tuning (the passive cooling is a nice plus too since these units tend to run hot when tuning to frequencies &gt; 1500&nbsp;MHz).</p>
 <h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
@@ -146,7 +146,7 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <li><strong>The <span class="caps">RTL2832U</span></strong>: Samples the signal and performs additional digital signal processing tasks such as decimation. Also handles <span class="caps">USB</span>&nbsp;control.</li>
 </ul>
 <p><div class="figure">
-	<img src="https://ajoo.blog/external_images/nesdr_mini_pcb_annotated.jpg" width="500" alt="NooElec RTL-SDR PCB">
+	<img src="https://ajoo-github-blog-old.pages.dev/external_images/nesdr_mini_pcb_annotated.jpg" width="500" alt="NooElec RTL-SDR PCB">
 	<p class="caption">NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle opened up. <a href=http://www.nooelec.com/store/sdr/sdr-receivers/nesdr-mini-rtl2832-r820t.html>Image&nbsp;source</a></p>
 </div></p>
 <p>The following sections will go into details about the function of each of these important components. Information from these sections is gathered from multiple sources including the <a href="https://github.com/steve-m/librtlsdr">Osmocom driver&#8217;s source code</a>. <a href="http://superkuh.com/rtlsdr.html">Superkuh&#8217;s website</a> deserves a special mention as it is a veritable treasure cove for anything <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;related.</p>

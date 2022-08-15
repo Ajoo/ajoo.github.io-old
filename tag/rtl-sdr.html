@@ -4,7 +4,7 @@
         <meta charset="utf-8" /> 	
 		<meta name="viewport" content="width=device-width">
         <title>Ajoo's Blog - RTL-SDR</title>
-        <link rel="stylesheet" href="https://ajoo.blog/theme/css/main.css" />
+        <link rel="stylesheet" href="https://ajoo-github-blog-old.pages.dev/theme/css/main.css" />
         <link href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
 
         <!--[if IE]>
@@ -32,7 +32,7 @@
         <span>Tue 07 February 2017</span>
 <span>| tags: <a href="https://ajoo-github-blog-old.pages.dev/tag/rtl-sdr.html">RTL-SDR</a><a href="https://ajoo-github-blog-old.pages.dev/tag/python.html">Python</a><a href="https://ajoo-github-blog-old.pages.dev/tag/dsp.html">DSP</a></span>
 </footer><!-- /.post-info --><p><div class="figure">
-	<img src="https://ajoo.blog/external_images/SDRBlogImage_1_Rotated.jpg" width="500" alt="RTL-SDR blog USB dongle">
+	<img src="https://ajoo-github-blog-old.pages.dev/external_images/SDRBlogImage_1_Rotated.jpg" width="500" alt="RTL-SDR blog USB dongle">
 	<p class="caption"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog <span class="caps">USB</span> dongle. <a href=http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/>Image&nbsp;source</a></p>
 </div></p>
 <p>In this second and final part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over the most popular software that is available for use with <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles. I&#8217;ll try to provide a big picture but I&#8217;ll be focusing more on what I intend to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;projects.</p>
@@ -40,7 +40,7 @@
 <p>This post builds on the concepts presented in the <a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html">first part of this introduction</a> helping frame them in the context of a real world&nbsp;application.</p>
 <h1><span class="caps">SDR</span>#</h1>
 <p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog has a great <a href="http://www.rtl-sdr.com/qsg">quickstart guide</a> to get you started with your <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. If you&#8217;re on Windows and follow the <span class="caps">SDR</span># Setup Guide section you should be able to get your generic WinUSB drivers installed and your dongle working with <span class="caps">SDR</span>#. This program is a bit of a Jack of all trades when it comes to <span class="caps">SDR</span>. With a nice <span class="caps">GUI</span> interface it is able to demodulate many different kinds of signals providing you a nice visualization of the power spectral density (<span class="caps">PSD</span>) estimate and spectrogram (also known as waterfall) of the output of your <span class="caps">RTL</span>-<span class="caps">SDR</span>. Below is a screenshot of the program running when tuned for a section of the comercial <span class="caps">FM</span>&nbsp;band:</p>
-<p><img alt="SDR# screenshot" src="https://ajoo.blog/images/SDR_sharp_screenshot.jpg"></p>
+<p><img alt="SDR# screenshot" src="https://ajoo-github-blog-old.pages.dev/images/SDR_sharp_screenshot.jpg"></p>
 <p>We won&#8217;t play around much with this program so I won&#8217;t elaborate more, but it&#8217;s always nice to have around. Make sure to tune to an <span class="caps">FM</span> radio station you like that has a strong enough signal and write down its frequency. I will be using 97.4 MHz throughout this post, the frequency for Radio Comercial here in Lisbon, which has a particularly strong signal where I&#8217;m&nbsp;living.</p>
 <h1>librtlsdr and the rtl-sdr&nbsp;codebase</h1>
 <p>Most software that interfaces with the <span class="caps">RTL</span>-<span class="caps">SDR</span> makes use of this library. If you followed the quickstart guide linked above and downloaded <span class="caps">SDR</span>#, one of the things it has you do is run a batch file that downloads a pre-build package of this codebase and copies the 32 bit version of rtlsdr.dll to the sdrsharp folder. Sadly it throws the rest of it away so you&#8217;ll have to go ahead to the <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom rtl-sdr website</a> and download it again if you need the 64 bit version and the command line utilities that come packaged with it. You can either grab the <a href="http://sdr.osmocom.org/trac/attachment/wiki/rtl-sdr/RelWithDebInfo.zip">pre-built windows version</a> or <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr#Buildingthesoftware">build it from source</a> if you&#8217;re on Linux (or feeling&nbsp;adventurous).</p>

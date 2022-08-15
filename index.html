@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width">
         <title>Ajoo's Blog</title>
         <link rel="stylesheet" href="https://ajoo.blog/theme/css/main.css" />
-        <link href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
+        <link href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
 
         <!--[if IE]>
             <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -14,30 +14,30 @@
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="http://ajoo.blog/">Ajoo's Blog </a></h1>
+                <h1><a href="https://ajoo-github-blog-old.pages.dev/">Ajoo's Blog </a></h1>
                 <nav><ul>
 <!--                  -->
-                    <li><a href="http://ajoo.blog/pages/cv.html"><span class="caps">CV</span></a></li>
-                    <li><a href="http://ajoo.blog/pages/about.html">About</a></li>
-                    <li><a href="http://ajoo.blog/category/general.html">General</a></li>
-                    <li><a href="http://ajoo.blog/category/sdr.html">SDR</a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/pages/cv.html"><span class="caps">CV</span></a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/pages/about.html">About</a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/category/general.html">General</a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/category/sdr.html">SDR</a></li>
                 </ul>
                 </nav>
         </header><!-- /#banner -->
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="http://ajoo.blog/intro-to-rtl-sdr-part-ii-software.html">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part <span class="caps">II</span> -&nbsp;Software</a></h1>
+                    <h1 class="entry-title"><a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-ii-software.html">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part <span class="caps">II</span> -&nbsp;Software</a></h1>
 <footer class="post-info">
         <span>Tue 07 February 2017</span>
-<span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/python.html">Python</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
+<span>| tags: <a href="https://ajoo-github-blog-old.pages.dev/tag/rtl-sdr.html">RTL-SDR</a><a href="https://ajoo-github-blog-old.pages.dev/tag/python.html">Python</a><a href="https://ajoo-github-blog-old.pages.dev/tag/dsp.html">DSP</a></span>
 </footer><!-- /.post-info --><p><div class="figure">
 	<img src="https://ajoo.blog/external_images/SDRBlogImage_1_Rotated.jpg" width="500" alt="RTL-SDR blog USB dongle">
 	<p class="caption"><span class="caps">RTL</span>-<span class="caps">SDR</span> blog <span class="caps">USB</span> dongle. <a href=http://www.rtl-sdr.com/buy-rtl-sdr-dvb-t-dongles/>Image&nbsp;source</a></p>
 </div></p>
 <p>In this second and final part of my introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> I&#8217;ll go over the most popular software that is available for use with <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles. I&#8217;ll try to provide a big picture but I&#8217;ll be focusing more on what I intend to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span>&nbsp;projects.</p>
 <p>As a software defined radio Hello World of sorts I&#8217;ll go over how to demodulate <span class="caps">FM</span> signals using a variety of tools. First using specialized software that does the demodulation for us (<span class="caps">SDR</span># and rtl_fm) and then doing the demodulation directly from captured samples of the complex-baseband representation (<span class="caps">IQ</span>) using the python scientific computing&nbsp;ecosystem. </p>
-<p>This post builds on the concepts presented in the <a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html">first part of this introduction</a> helping frame them in the context of a real world&nbsp;application.</p>
+<p>This post builds on the concepts presented in the <a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html">first part of this introduction</a> helping frame them in the context of a real world&nbsp;application.</p>
 <h1><span class="caps">SDR</span>#</h1>
 <p>The <span class="caps">RTL</span>-<span class="caps">SDR</span> blog has a great <a href="http://www.rtl-sdr.com/qsg">quickstart guide</a> to get you started with your <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. If you&#8217;re on Windows and follow the <span class="caps">SDR</span># Setup Guide section you should be able to get your generic WinUSB drivers installed and your dongle working with <span class="caps">SDR</span>#. This program is a bit of a Jack of all trades when it comes to <span class="caps">SDR</span>. With a nice <span class="caps">GUI</span> interface it is able to demodulate many different kinds of signals providing you a nice visualization of the power spectral density (<span class="caps">PSD</span>) estimate and spectrogram (also known as waterfall) of the output of your <span class="caps">RTL</span>-<span class="caps">SDR</span>. Below is a screenshot of the program running when tuned for a section of the comercial <span class="caps">FM</span>&nbsp;band:</p>
 <p><img alt="SDR# screenshot" src="https://ajoo.blog/images/SDR_sharp_screenshot.jpg"></p>
@@ -380,7 +380,7 @@ Output at <span class="m">240000</span> Hz.
 </pre></div>
 
 
-<p><img alt="Whole spectrum" src="http://ajoo.blog/images/pwelch_whole.png"></p>
+<p><img alt="Whole spectrum" src="https://ajoo-github-blog-old.pages.dev/images/pwelch_whole.png"></p>
 <p>The first thing you should notice is that I have massively oversampled the <span class="caps">FM</span> signal. Recall that at a sample rate of 2.4 MHz we&#8217;re seeing a portion of the spectrum ranging from 97.4 MHz +- 1.2 MHz. The bandwidth of a comercial <span class="caps">FM</span> radio station however is usually around 200 kHz and the two peaks to the left and right of the main one are actually 2 different stations with a weaker&nbsp;signal.</p>
 <p>Oversampling the signal we want has an advantage which I touched upon in the rtl_fm section but I&#8217;ll reiterate here. Because the <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">ADC</span> is 8 bit there will be significant quantization noise. Oversampling and decimating in software where the 8-bit limitation doesn&#8217;t exist should yield a better <span class="caps">SNR</span> figure. I assume that this is the reason that <span class="caps">SDR</span># also samples at 2.4 MHz by default when listening to <span class="caps">FM</span>.</p>
 <p>As to the other stations, we could have gotten rid of them by setting our <span class="caps">IF</span> filter bandwidth smaller. It was automatically set by the driver at 2.4 MHz when we set the sample rate and I chose not to manually set it lower because I wanted these other signals to show up in order to illustrate a point further along. Adjusting your <span class="caps">IF</span> filter to the bandwidth of the signal you&#8217;re interested in when oversampling is probably a good idea since more selectivity is always&nbsp;good.</p>
@@ -391,8 +391,8 @@ Output at <span class="m">240000</span> Hz.
 
 
 <p>As you can see the <span class="caps">PSD</span> estimate now contains only the signal of interest which is the broadcast by <span class="caps">FM</span> station Rádio&nbsp;Comercial:</p>
-<p><img alt="Comercial spectrum" src="http://ajoo.blog/images/pwelch_comercial.png"></p>
-<p>We can now proceed with the demodulation. Going back to the <a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html#Frequency Demodulation">section on <span class="caps">FM</span> modulation</a> of the first part of this introduction we find that in order to demodulate an <span class="caps">FM</span> signal from it&#8217;s complex baseband representation, it suffices to differentiate the angle of the&nbsp;signal:</p>
+<p><img alt="Comercial spectrum" src="https://ajoo-github-blog-old.pages.dev/images/pwelch_comercial.png"></p>
+<p>We can now proceed with the demodulation. Going back to the <a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html#Frequency Demodulation">section on <span class="caps">FM</span> modulation</a> of the first part of this introduction we find that in order to demodulate an <span class="caps">FM</span> signal from it&#8217;s complex baseband representation, it suffices to differentiate the angle of the&nbsp;signal:</p>
 <div class="math">$$\frac{\text{d}\angle s_b(t)}{\text{d}t} = 2\pi f_\Delta m(t)$$</div>
 <p>In discrete-time this can be accomplished through a differentiating <span class="caps">FIR</span> filter. For the sake of simplicity we&#8217;ll use the simple forward difference <span class="math">\(\left(1-q^{-1}\right)\)</span> through numpy&#8217;s <em>diff</em>&nbsp;function:</p>
 <div class="highlight"><pre><span></span><span class="n">angle_comercial</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unwrap</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">angle</span><span class="p">(</span><span class="n">iq_comercial</span><span class="p">))</span>
@@ -427,7 +427,7 @@ $$</div>
 
 
 <p>We can then decimate the resulting signal in order to obtain the complex baseband representation of the <span class="caps">FM</span> broadcast of Smooth <span class="caps">FM</span> in the same fashion as we did for Rádio Comercial. The <span class="caps">PSD</span> estimate of the 3 signals is depicted next for&nbsp;comparison:</p>
-<p><img alt="Comercial spectrum" src="http://ajoo.blog/images/pwelch_smooth.png"></p>
+<p><img alt="Comercial spectrum" src="https://ajoo-github-blog-old.pages.dev/images/pwelch_smooth.png"></p>
 <p>Demodulation can then be done in the same way yielding the following&nbsp;result:</p>
 <p><div class="audio-container"><audio controls><source src="/audio/smooth_demodulated.wav" type="audio/wav">Your browser does not support the audio element.</audio></div></p>
 <p>We can see that this example is a bit noisier owing to the roughly 100-fold less power of the received signal. However it&#8217;s pretty much still audible which only speaks to the frequency modulation&#8217;s noise&nbsp;tolerance.</p>
@@ -492,7 +492,7 @@ $$</div>
         "}";
     (document.body || document.getElementsByTagName('head')[0]).appendChild(mathjaxscript);
 }
-</script><p><a href="http://ajoo.blog/intro-to-rtl-sdr-part-ii-software.html#disqus_thread">comments</a></p>                </article>
+</script><p><a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-ii-software.html#disqus_thread">comments</a></p>                </article>
             </aside><!-- /#featured -->
                 <section id="content" class="body">
                     <h1>Other articles</h1>
@@ -500,37 +500,37 @@ $$</div>
 
             <li><article class="hentry">
                 <header>
-                    <h1><a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html" rel="bookmark"
+                    <h1><a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html" rel="bookmark"
                            title="Permalink to Intro to RTL-SDR, Part I - Principles and Hardware">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part I - Principles and&nbsp;Hardware</a></h1>
                 </header>
 
                 <div class="entry-content">
 <footer class="post-info">
         <span>Wed 25 January 2017</span>
-<span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
+<span>| tags: <a href="https://ajoo-github-blog-old.pages.dev/tag/rtl-sdr.html">RTL-SDR</a><a href="https://ajoo-github-blog-old.pages.dev/tag/dsp.html">DSP</a></span>
 </footer><!-- /.post-info -->                <p>A summary of what I&#8217;ve learned about <span class="caps">RTL</span>-<span class="caps">SDR</span> so far. From the working principles of the <span class="caps">USB</span> dongles to the software I intend to use to capture and process the data for future&nbsp;projects.</p>
-                <a class="readmore" href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html">read more</a>
-<p><a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
+                <a class="readmore" href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html">read more</a>
+<p><a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
             </article></li>
 
             <li><article class="hentry">
                 <header>
-                    <h1><a href="http://ajoo.blog/software-defined-gnss.html" rel="bookmark"
+                    <h1><a href="https://ajoo-github-blog-old.pages.dev/software-defined-gnss.html" rel="bookmark"
                            title="Permalink to Software Defined GNSS">Software Defined <span class="caps">GNSS</span></a></h1>
                 </header>
 
                 <div class="entry-content">
 <footer class="post-info">
         <span>Sun 18 December 2016</span>
-<span>| tags: <a href="http://ajoo.blog/tag/gnss.html">GNSS</a><a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a><a href="http://ajoo.blog/tag/python.html">Python</a></span>
+<span>| tags: <a href="https://ajoo-github-blog-old.pages.dev/tag/gnss.html">GNSS</a><a href="https://ajoo-github-blog-old.pages.dev/tag/rtl-sdr.html">RTL-SDR</a><a href="https://ajoo-github-blog-old.pages.dev/tag/dsp.html">DSP</a><a href="https://ajoo-github-blog-old.pages.dev/tag/python.html">Python</a></span>
 </footer><!-- /.post-info -->                <p>A short introduction to my Software Defined <span class="caps">GNSS</span>&nbsp;project</p>
-                <a class="readmore" href="http://ajoo.blog/software-defined-gnss.html">read more</a>
-<p><a href="http://ajoo.blog/software-defined-gnss.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
+                <a class="readmore" href="https://ajoo-github-blog-old.pages.dev/software-defined-gnss.html">read more</a>
+<p><a href="https://ajoo-github-blog-old.pages.dev/software-defined-gnss.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
             </article></li>
 
             <li><article class="hentry">
                 <header>
-                    <h1><a href="http://ajoo.blog/first-post.html" rel="bookmark"
+                    <h1><a href="https://ajoo-github-blog-old.pages.dev/first-post.html" rel="bookmark"
                            title="Permalink to First Post">First&nbsp;Post</a></h1>
                 </header>
 
@@ -539,8 +539,8 @@ $$</div>
         <span>Sat 17 December 2016</span>
 
 </footer><!-- /.post-info -->                <p>Season&#8217;s greetings! I&#8217;ve decided to get an early start on my New Years resolution of writing a personal blog. It&#8217;s been on my bucket list for a long time and I&#8217;m glad that it is finally coming to fruition. In this blog I hope to document …</p>
-                <a class="readmore" href="http://ajoo.blog/first-post.html">read more</a>
-<p><a href="http://ajoo.blog/first-post.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
+                <a class="readmore" href="https://ajoo-github-blog-old.pages.dev/first-post.html">read more</a>
+<p><a href="https://ajoo-github-blog-old.pages.dev/first-post.html#disqus_thread">comments</a></p>                </div><!-- /.entry-content -->
             </article></li>
             </ol><!-- /#posts-list -->
 <p class="paginator">
@@ -551,7 +551,7 @@ $$</div>
                 <div class="social">
                         <h2>social</h2>
                         <ul>
-                            <li><a href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+                            <li><a href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
 
                             <li><a href="https://github.com/Ajoo">github</a></li>
                             <li><a href="mailto:ajoo@outlook.pt">email</a></li>

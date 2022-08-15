@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width">
         <title>Intro to RTL-SDR, Part I - Principles and Hardware</title>
         <link rel="stylesheet" href="https://ajoo.blog/theme/css/main.css" />
-        <link href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
+        <link href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Ajoo's Blog Atom Feed" />
 
         <!--[if IE]>
             <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -14,13 +14,13 @@
 
 <body id="index" class="home">
         <header id="banner" class="body">
-                <h1><a href="http://ajoo.blog/">Ajoo's Blog </a></h1>
+                <h1><a href="https://ajoo-github-blog-old.pages.dev/">Ajoo's Blog </a></h1>
                 <nav><ul>
 <!--                  -->
-                    <li><a href="http://ajoo.blog/pages/cv.html"><span class="caps">CV</span></a></li>
-                    <li><a href="http://ajoo.blog/pages/about.html">About</a></li>
-                    <li><a href="http://ajoo.blog/category/general.html">General</a></li>
-                    <li class="active"><a href="http://ajoo.blog/category/sdr.html">SDR</a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/pages/cv.html"><span class="caps">CV</span></a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/pages/about.html">About</a></li>
+                    <li><a href="https://ajoo-github-blog-old.pages.dev/category/general.html">General</a></li>
+                    <li class="active"><a href="https://ajoo-github-blog-old.pages.dev/category/sdr.html">SDR</a></li>
                 </ul>
                 </nav>
         </header><!-- /#banner -->
@@ -28,16 +28,16 @@
   <article>
     <header>
       <h1 class="entry-title">
-        <a href="http://ajoo.blog/intro-to-rtl-sdr-part-i-principles-and-hardware.html" rel="bookmark"
+        <a href="https://ajoo-github-blog-old.pages.dev/intro-to-rtl-sdr-part-i-principles-and-hardware.html" rel="bookmark"
            title="Permalink to Intro to RTL-SDR, Part I - Principles and Hardware">Intro to <span class="caps">RTL</span>-<span class="caps">SDR</span>, Part I - Principles and&nbsp;Hardware</a></h1>
     </header>
 
     <div class="entry-content">
 <footer class="post-info">
         <span>Wed 25 January 2017</span>
-<span>| tags: <a href="http://ajoo.blog/tag/rtl-sdr.html">RTL-SDR</a><a href="http://ajoo.blog/tag/dsp.html">DSP</a></span>
+<span>| tags: <a href="https://ajoo-github-blog-old.pages.dev/tag/rtl-sdr.html">RTL-SDR</a><a href="https://ajoo-github-blog-old.pages.dev/tag/dsp.html">DSP</a></span>
 </footer><!-- /.post-info -->      <p><div class="figure">
-	<img src="http://ajoo.blog/external_images/nesdr_mini_2.png" width="500" alt="NooElec RTL-SDR">
+	<img src="https://ajoo-github-blog-old.pages.dev/external_images/nesdr_mini_2.png" width="500" alt="NooElec RTL-SDR">
 	<p class="caption">NooElec <span class="caps">RTL</span>-<span class="caps">SDR</span> <span class="caps">USB</span> dongle. <a href=http://www.nooelec.com/store/sdr/sdr-receivers/nesdr-mini-rtl2832-r820t.html>Image&nbsp;source</a></p>
 </div></p>
 <p>The purpose of this article is to introduce a small and cheap device that is quickly becoming a staple of the modern radiofrequency enthusiast&#8217;s toolbox. Initially this two-part introduction to <span class="caps">RTL</span>-<span class="caps">SDR</span> was meant as a single blog post. I intended to first go through the theory and working principles of the hardware and then move on to the software that I plan to use in future <span class="caps">RTL</span>-<span class="caps">SDR</span> projects. Finally, I intended to use this software to implement a simple <span class="caps">FM</span> demodulator in order to illustrate my points through a practical&nbsp;application.</p>
@@ -51,7 +51,7 @@
 <li><strong>Amplitude Modulation (<span class="caps">AM</span>)</strong>: where the characteristic that is made to vary is the amplitude <span class="math">\(B(t)\)</span> of the&nbsp;carrier;</li>
 <li><strong>Phase/Frequency Modulation (<span class="caps">PM</span>/<span class="caps">FM</span>)</strong>: where the characteristic that varies is the phase <span class="math">\(\theta (t)\)</span> of the&nbsp;carrier.</li>
 </ul>
-<p><img alt="Modulation" src="http://ajoo.blog/images/modulation.svg"></p>
+<p><img alt="Modulation" src="https://ajoo-github-blog-old.pages.dev/images/modulation.svg"></p>
 <p>We&#8217;ll discuss these in the following sections as they help introduce a few points that are important later on but before we move on here&#8217;s a useful glossary of terms commonly used in&nbsp;telecommunications:</p>
 <ul>
 <li><strong>Baseband</strong> (signal): Signal that has support in a narrow range of frequencies about 0&nbsp;Hz;</li>
@@ -68,9 +68,9 @@ S(f)&amp; =&amp; M(f)*\frac{A}{2}[\delta (f-f_c) + \delta (f+f_c)]\\\\
 &amp;=&amp; \frac{A}{2}[M(f-f_c)+M(f+f_c)]
 \end{eqnarray*}$$</div>
 <p>which effectively shifts the spectrum of <span class="math">\(m\)</span> to <span class="math">\(f_c\)</span>. If <span class="math">\(m(t)\)</span> is a baseband signal, this (up)converts it to a passband signal around <span class="math">\(f_c\)</span> so it can be transmitted through an appropriate bandpass&nbsp;channel.</p>
-<p><img alt="AM modulation" src="http://ajoo.blog/images/AM_modulation.svg"></p>
+<p><img alt="AM modulation" src="https://ajoo-github-blog-old.pages.dev/images/AM_modulation.svg"></p>
 <p>Demodulating the signal can in theory be done by multiplying again by a sinusoid of the appropriate frequency. This second mixing will shift a copy of the original message back to f=0 and another to a frequency <span class="math">\(f=2f_c\)</span> which can be discarded by low-pass&nbsp;filtering. </p>
-<p><img alt="AM demodulation" src="http://ajoo.blog/images/AM_demodulation.svg"></p>
+<p><img alt="AM demodulation" src="https://ajoo-github-blog-old.pages.dev/images/AM_demodulation.svg"></p>
 <p>On the receiver side however we don&#8217;t know the original phase of the carrier, which we will denote <span class="math">\(\phi\)</span>, and therefore it&#8217;s impossible to align it with the sinusoid generated locally at the receiver end. Introducing this initial phase our received signal can be written&nbsp;as:</p>
 <div class="math">$$\begin{eqnarray*}
 s(t)&amp; =&amp; Am(t)\cos(2\pi f_ct+\phi)\\\\
@@ -84,12 +84,12 @@ s(t)&amp; =&amp; Am(t)\cos(2\pi f_ct+\phi)\\\\
 <div class="math">$$s_b(t)\doteq h_{LP}(t)*s(t)\begin{bmatrix}\cos(2\pi f_ct) \\-\sin(2\pi f_ct) \end{bmatrix}=\frac{A}{2}m(t)\begin{bmatrix}\cos(\phi) \\ \sin(\phi) \end{bmatrix}$$</div>
 <p>
 And since the sine and cosine can&#8217;t both be 0 we can always recover our message. An elegant way of doing that is by taking the Euclidean norm of the vector which gets rid of the factor depending on <span class="math">\(\phi\)</span> yielding <span class="math">\(Am(t)/2\)</span>. We can also figure out the original carrier wave&#8217;s phase from the arctangent of the two&nbsp;components.</p>
-<p><img alt="AM demodulation diagram" src="http://ajoo.blog/images/AM_demodulation_diagram_cb.svg"></p>
+<p><img alt="AM demodulation diagram" src="https://ajoo-github-blog-old.pages.dev/images/AM_demodulation_diagram_cb.svg"></p>
 <p><em>It is important to note however that in <strong>standard <span class="caps">AM</span></strong> the message must first be shifted by a constant C such that <span class="math">\(m(t)+C\geq 0\)</span>. This means higher power consumption since we&#8217;re &#8220;wasting&#8221; energy transmitting the carrier together with the message but on the other hand the receiver has access to the original carrier and certain simpler demodulation schemes such as envelope detection are&nbsp;available.</em></p>
 <h2>Complex Baseband&nbsp;Representation</h2>
 <p>What we&#8217;ve done in order to demodulate <span class="caps">AM</span> is essentially downconvert the modulated signal back to baseband. We realized however that mixing with a single sinusoid does not capture all the information present in the original passband signal but that two not in phase sinusoids must be used. This can be interpreted making use of the fact that Fourier transforms of real signals are in the general case complex functions of frequency satisfying <span class="math">\(S(f)=S^*(-f)\)</span>. Mixing a passband signal with a cosine wave will shift the spectrum but kill any imaginary component since the positive and negative frequency contributions will cancel each other out. The same is true for sine waves and real&nbsp;components. </p>
 <p>One way to retain full information is then to simply multiply the passband signal with a complex sinusoid <span class="math">\(e^{-j2\pi f_ct}\)</span> which  will shift only the positive part of the spectrum back to f=0 avoiding the whole&nbsp;issue.</p>
-<p><img alt="Complex Baseband Spectrum" src="http://ajoo.blog/images/CB_spectrum.svg"></p>
+<p><img alt="Complex Baseband Spectrum" src="https://ajoo-github-blog-old.pages.dev/images/CB_spectrum.svg"></p>
 <p>That&#8217;s exactly what we&#8217;ve done with our modified demodulation except we disguised it by writing it as a real 2-vector&nbsp;instead:
 </p>
 <div class="math">$$e^{-j2\pi f_ct}=\cos(2\pi f_ct)-j\sin(2\pi f_ct)\rightarrow \begin{bmatrix}\cos(2\pi f_ct) \\-\sin(2\pi f_ct) \end{bmatrix}$$</div>
@@ -101,7 +101,7 @@ which implicitly defines its <strong>I</strong>n phase (<span class="math">\(s_I
 </p>
 <div class="math">$$s_b(t) \doteq s_I(t)+js_Q(t)$$</div>
 <p>This is a very useful representation of a pass-band signal since it contains the same information as the original signal but is band-limited by a much lower frequency. If <span class="math">\(s(t)\)</span> has a bandwidth of W around a frequency <span class="math">\(f_c\)</span>, then it&#8217;s band-limited by <span class="math">\(f_c+W/2\)</span> and therefore, by Nyquist&#8217;s theorem, must be sampled at least at <span class="math">\(f_s \geq 2f_c+W\)</span>. By contrast, <span class="math">\(s_b(t)\)</span> is band-limited by <span class="math">\(W/2\)</span> and can be sampled and digitally processed at the (usually) much more amenable <span class="math">\(f_s \geq W\)</span>.</p>
-<p><img alt="Complex Baseband" src="http://ajoo.blog/images/complex_baseband_real_imag.svg"></p>
+<p><img alt="Complex Baseband" src="https://ajoo-github-blog-old.pages.dev/images/complex_baseband_real_imag.svg"></p>
 <p>Alternative ways to write <span class="math">\(s(t)\)</span> as a function of <span class="math">\(s_b(t)\)</span>&nbsp;are:
 </p>
 <div class="math">$$\begin{eqnarray*}
@@ -110,7 +110,7 @@ s(t)&amp; =&amp; \mathrm{Re}[2s_b(t)e^{j2\pi f_ct}]\\\\
 \end{eqnarray*}$$</div>
 <p>The last expression makes obvious what we already saw in the previous section about demodulating an <span class="caps">AM</span> signal given it&#8217;s complex baseband representation. That it amounts to taking it&#8217;s complex norm: <span class="math">\(\mid s_b(t)\mid\)</span> (also called the envelope). Likewise, it&#8217;s phase <span class="math">\(\angle s_b(t)\)</span> gives us all the information necessary to demodulate any angle based&nbsp;modulation.</p>
 <p>We can now represent the same diagram depicting how to obtain the complex baseband representation and reconstruct the original passband signal but in complex&nbsp;notation:</p>
-<p><img alt="Complex Baseband" src="http://ajoo.blog/images/complex_baseband_complex.svg"></p>
+<p><img alt="Complex Baseband" src="https://ajoo-github-blog-old.pages.dev/images/complex_baseband_complex.svg"></p>
 <h2>Frequency&nbsp;Modulation</h2>
 <p>In frequency modulation the message is encoded in the instantaneous frequency of the carrier&nbsp;wave:</p>
 <div class="math">$$\begin{eqnarray*}
@@ -121,11 +121,11 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <div class="math">$$\mid s_b(t)\mid = \frac{A}{2},\quad\angle s_b(t) = 2\pi f_\Delta\int_{-\infty}^{t}m(\tau)d\tau$$</div>
 <p>We can thus easily find a scheme to demodulate <span class="caps">FM</span> signals by converting to complex baseband and differentiating its phase in order to find the instantaneous&nbsp;frequency:</p>
 <div class="math">$$\frac{\text{d}\angle s_b(t)}{\text{d}t} = 2\pi f_\Delta m(t)$$</div>
-<p><img alt="FM Demodulation Diagram" src="http://ajoo.blog/images/FM_demodulation_diagram.svg"></p>
+<p><img alt="FM Demodulation Diagram" src="https://ajoo-github-blog-old.pages.dev/images/FM_demodulation_diagram.svg"></p>
 <h1>Software Defined&nbsp;Radio</h1>
 <p>Many forms of radio communication systems were designed with analog technology in mind. Software Defined Radio (<strong><span class="caps">SDR</span></strong>) is a communication system where part of the traditionally analog signal processing, accomplished by means of analog electronic circuits is replaced by digital signal processing (<span class="caps">DSP</span>, accomplished my means of analog to digital conversion/digital to analog conversion (<span class="caps">ADC</span>/<span class="caps">DAC</span>) and any form of computers or embedded system running <span class="caps">DSP</span>&nbsp;software.</p>
 <p>By replacing hardware components with software, through inserting an <span class="caps">ADC</span>/<span class="caps">DAC</span> as far upstream the signal flow as possible and processing the digital signal instead, very flexible and general purpose systems can be realized since software is much easier to change than hardware components. Ideally, one would place an <span class="caps">ADC</span> or <span class="caps">DAC</span> directly at the antenna for maximum flexibility  but this is not practical and <span class="caps">SDR</span> systems typically include a flexible <a href="https://en.wikipedia.org/wiki/RF_front_end">radio frequency (<span class="caps">RF</span>) front-end</a> before sampling as in the conceptual diagram below depicting the typical <span class="caps">SDR</span> system based on the one that can be found on <a href="https://en.wikipedia.org/wiki/Software-defined_radio">Wikipedia&#8217;s <span class="caps">SDR</span> Page</a>:</p>
-<p><img alt="Conceptual SDR system" src="http://ajoo.blog/images/SDR_system.svg"></p>
+<p><img alt="Conceptual SDR system" src="https://ajoo-github-blog-old.pages.dev/images/SDR_system.svg"></p>
 <p>Note that the term Software Defined Radio denotes the whole communication system including the antenna, any specialized hardware and the computer/embedded system running the <span class="caps">DSP</span>. In the following however we&#8217;ll (ab)use it by equating it with the hardware that is used to deliver the digital samples to a personal computer since that is the use case we&#8217;re interested&nbsp;in.</p>
 <h1>A Cheap <span class="caps">SDR</span></h1>
 <p>There are many general purpose commercially available SDRs, both receiver only and receiver/transceiver, but they&#8217;re rather expensive in general (&gt;€100 for <span class="caps">RX</span> and &gt;€300 for <span class="caps">RX</span>/<span class="caps">TX</span>). This is where <span class="caps">DVB</span>-T <span class="caps">TV</span> tuner <span class="caps">USB</span> dongles based on the <span class="caps">RTL2832U</span> chipset come into play. As the name indicates, these cheap dongles (€10~€20) were meant for receiving <span class="caps">DVB</span>-T <span class="caps">TV</span> but hacked drivers from <a href="http://sdr.osmocom.org/trac/wiki/rtl-sdr">Osmocom</a> are able to turn them into wideband receiver only SDRs. This cheap <span class="caps">SDR</span> is therefore typically known as the <strong><span class="caps">RTL</span>-<span class="caps">SDR</span></strong>:</p>
@@ -135,9 +135,9 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <h2>The innards of <span class="caps">RTL2832U</span> based <span class="caps">DVB</span>-T <span class="caps">TV</span> <span class="caps">USB</span>&nbsp;dongles</h2>
 <p>The overall architecture of <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles is based on a <a href="https://en.wikipedia.org/wiki/Superheterodyne_receiver">superheterodyne receiver</a> which is a popular design for receivers that must be able to process signals at a wide range of user-selected frequencies, isolating them from other signals and amplifying them. Examples are many conventional <span class="caps">AM</span>/<span class="caps">FM</span> radio receivers where the user selects a channel by tuning the radio to it&#8217;s carrier wave&nbsp;frequency.</p>
 <p>A selective enough filter must be applied to the signal coming from the antenna in order to filter out other signals and noise outside the band of interest before demodulation. For the purpose described above it must also have a tunable center-frequency which makes its practical implementation troublesome. Superheterodyne architectures solve this by downconverting first to an <strong>intermediate frequency</strong> (<span class="caps">IF</span>) in which more rigorous filtering and amplification stages can be applied now that the signal is at a fixed pre-specified frequency (see the figure below for a typical&nbsp;setup).</p>
-<p><img alt="Superheterodyne Receiver" src="http://ajoo.blog/images/superhet.svg"></p>
+<p><img alt="Superheterodyne Receiver" src="https://ajoo-github-blog-old.pages.dev/images/superhet.svg"></p>
 <p>This downconversion is achieved by mixing with a sinusoidal wave of the appropriate frequency generated by a local oscillator (<span class="caps">LO</span>). When the user selects a frequency <span class="math">\(f_c\)</span> to tune to, the <span class="caps">LO</span> generates a sine wave at either <span class="math">\(f_{LO} = f_c-f_{IF}\)</span> (low-side injection) or <span class="math">\(f_{LO} = f_c+f_{IF}\)</span> (high-side injection, note that when using this frequency the spectrum of the resulting signal will be inverted in frequency). A byproduct of this mixing is that both <span class="math">\(f_c\)</span> and <span class="math">\(f_c\mp 2f_{IF}\)</span> (for low/high side injection respectively) get mixed into the intermediate frequency. The first is the frequency of interest and the other is the so called <strong>image frequency</strong>.</p>
-<p><img alt="IF Spectrum" src="http://ajoo.blog/images/IF_spectrum.svg"></p>
+<p><img alt="IF Spectrum" src="https://ajoo-github-blog-old.pages.dev/images/IF_spectrum.svg"></p>
 <p>An initial radio frequency (<span class="caps">RF</span>) filtering stage is therefore useful in order to filter out any signal or noise at this image frequency. This <span class="caps">RF</span> filter often has a variable center frequency whose tuning is shared with the <span class="caps">LO</span>. Another common component of the <span class="caps">RF</span> section of the receiver is an amplifier, often called a low noise amplifier (<span class="caps">LNA</span>).</p>
 <p>While traditionally the intermediate frequency signal processing section was analog, lately, due to the ubiquity of integrated circuits and the availability of micro-processors in many devices (such as cell-phones) the trend has been to handle some of these tasks digitally. In this case, superheterodyne architectures are useful as they downconvert a passband signal that is too impractical to sample (due to their high frequency requiring very high sample rates) into a lower frequency passband signal that is more manageable to sample without&nbsp;aliasing.</p>
 <p>In the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles the signal is sampled at a low intermediate frequency after an analog filtering and amplification stage and further processed digitally. <span class="caps">RTL</span>-<span class="caps">SDR</span> dongles contain 2 important integrated circuits (ICs) which implement the different functions of the superheterodyne&nbsp;receiver:</p>
@@ -153,7 +153,7 @@ s(t) &amp;= &amp;A\cos\left[2\pi \int_{-\infty}^{t}f_c+f_\Delta m(\tau)d\tau\rig
 <h3>Tuner</h3>
 <p>There are two main families of tuner chips of interest for <span class="caps">SDR</span> applications, the now discontinued Elonics E4000 and the Raphael Micro <span class="caps">R820T</span>/<span class="caps">R820T2</span> radio tuner which will be the focus of this discussion. The differences between the T and the T2 are small, essentially amounting to slightly better sensitivity<a href="http://superkuh.com/rtlsdr.html">¹</a> for practical&nbsp;purposes.</p>
 <p>The <a href="http://superkuh.com/gnuradio/R820T_datasheet-Non_R-20111130_unlocked.pdf">datasheet</a> for the <span class="caps">R820T</span> was leaked online so a lot is known about the inner workings of this chip. A <a href="http://superkuh.com/R820T2_Register_Description.pdf">register description</a> for the <span class="caps">R820T2</span> is also available which details the parameters of the tuner that can be set from outside. A high level simplified diagram based on the one found in the datasheet is depicted&nbsp;next:</p>
-<p><img alt="R820T Diagram" src="http://ajoo.blog/images/R820T.svg"> </p>
+<p><img alt="R820T Diagram" src="https://ajoo-github-blog-old.pages.dev/images/R820T.svg"> </p>
 <p>The signal coming from the antenna connector first goes through a low noise amplifier (<span class="caps">LNA</span>) and is then filtered by a bandpass filter and an image rejection filter. According to the datasheet, the image rejection is 65&nbsp;dBc.</p>
 <p>A fractional <span class="caps">PLL</span> based frequency synthesizer generates the <span class="caps">LO</span> that is mixed with this filtered signal in order to downconvert it to a low intermediate frequency. The user controls the local oscillator&#8217;s frequency directly through the parameters of the frequency synthesizer. This indirectly sets the <span class="caps">IF</span> frequency and whether low or high-side injection is used. 3.57 MHz and 4.57 MHz are typical values for the <span class="caps">IF</span> of <span class="caps">R820T</span> dongles<a href="http://superkuh.com/rtlsdr.html">¹</a> but it&#8217;s essentially up to the driver implementation to choose what values to use (subject to the limits imposed by the parameters of the synthesizer and the <span class="caps">IF</span>&nbsp;filter). </p>
 <p>The frequency range that the <span class="caps">RTL</span>-<span class="caps">SDR</span> is able to tune to is determined by the range of frequencies that the frequency synthesizer inside the chip can generate. The <span class="caps">R820T</span>’s official range found in the data sheet is [42; 1002] MHz with a tuning resolution of 1 Hz but the generally agreed upon real range is [24; 1766] MHz<a href="http://superkuh.com/rtlsdr.html">¹</a> as determined by the <span class="caps">RTL</span>-<span class="caps">SDR</span> community.
@@ -165,7 +165,7 @@ In fact, using an experimental set of <a href="https://github.com/mutability/rtl
 <p>This is the <span class="caps">IC</span> that gives the name to the <span class="caps">RTL</span>-<span class="caps">SDR</span> dongle. Unlike the tuner,  datasheets are not freely available online (you&#8217;ll need to sign an <span class="caps">NDA</span> to obtain one). A lot of what is known about the inner workings of this chip has therefore been figured out by the <span class="caps">RTL</span>-<span class="caps">SDR</span> community through reverse&nbsp;engineering. </p>
 <p>Realtek&#8217;s <a href="http://web.archive.org/web/20161012161902/http://www.realtek.com.tw/products/productsView.aspx?Langid=1&amp;PFid=35&amp;Level=4&amp;Conn=3&amp;ProdID=257"><span class="caps">RTL2832U</span> description</a> states that the chip is meant as a high-performance <span class="caps">DVB</span>-T demodulator (with additional support for <span class="caps">FM</span> and <span class="caps">DAB</span> radio). As such it includes an <span class="caps">ADC</span> to sample the <span class="caps">IF</span> signal coming from an appropriate tuner, all the specialized <span class="caps">DSP</span> required to demodulate <span class="caps">DVB</span>-T and a <span class="caps">USB</span> controller supporting a <span class="caps">USB</span> 2.0 interface. Usage as an <span class="caps">SDR</span> takes advantage of a &#8220;debug&#8221; mode in the chip to deliver the digital complex baseband representation samples directly through <span class="caps">USB</span>.</p>
 <p>The following high-level diagram represents my best understanding of the functions the <span class="caps">RTL2832U</span> is performing when using a non-zero <span class="caps">IF</span>:</p>
-<p><img alt="RTL2832U Diagram" src="http://ajoo.blog/images/RTL2832U.svg"></p>
+<p><img alt="RTL2832U Diagram" src="https://ajoo-github-blog-old.pages.dev/images/RTL2832U.svg"></p>
 <p>Initially, the signal coming out of the tuner is sampled by an 8-bit <span class="caps">ADC</span> running at 28.8 MHz. No significant aliasing should occur for the low <span class="caps">IF</span> values supported if the <span class="caps">IF</span> filter is selective enough to kill any strong signals outside its&nbsp;bandwidth.</p>
 <p>A <a href="https://en.wikipedia.org/wiki/Digital_down_converter">digital downconverter</a> (<span class="caps">DDC</span>) is then responsible for downconverting the digital signal to complex baseband. The process of obtaining the complex baseband representation is similar to the continuous-time case: mixing with a complex sinusoid will circularly shift the spectrum from <span class="caps">IF</span> down to baseband. The signal can then be low pass-filtered and downsampled to get rid of the unnecessary part of the spectrum that was shifted to higher frequencies since the signal of interest is now band-limited by a lower frequency. External configuration parameters inform the <span class="caps">DDC</span> of the <span class="caps">IF</span> frequency and whether the spectrum is inverted (i.e., if the tuner is high-side&nbsp;injecting).</p>
 <p>Finally decimation (using a <span class="caps">FIR</span> low pass filter and downsampling) is applied in order to reduce the sample rate of the signal to a value in the range [225001; 300000] Hz ∪ [900001; 3200000] Hz. 2.56 MHz is however the generally agreed upon highest safe sample rate where no samples will be dropped by the chip (they may still be dropped by the <span class="caps">USB</span>). This decimation is what usually sets the upper limit on the bandwidth of the sampled signal (unless the <span class="caps">IF</span> filter bandwidth is specifically chosen as lower than the Nyquist frequency for the sample&nbsp;rate).</p>
@@ -173,7 +173,7 @@ In fact, using an experimental set of <a href="https://github.com/mutability/rtl
 <h2>A High Level Behavioral&nbsp;Model</h2>
 <p>It is sometimes useful to have a simplified picture in mind of the <span class="caps">RTL</span>-<span class="caps">SDR</span>&#8217;s internals. This picture, while not perfectly accurate captures the essential behavior of the hardware while hiding some of the complexity. One such behavioral level model of the <span class="caps">RTL</span>-<span class="caps">SDR</span> is presented next, based upon
 <a href="http://www.eas.uccs.edu/~mwickert/ece4670/lecture_notes/Lab6.pdf">Lab 6</a> from <a href="http://web.stanford.edu/class/ee179/">Stanford&#8217;s Analog and Digital Communication Systems 2014 course</a>:</p>
-<p><img alt="Behavioral Model" src="http://ajoo.blog/images/behavioural_model.svg"> </p>
+<p><img alt="Behavioral Model" src="https://ajoo-github-blog-old.pages.dev/images/behavioural_model.svg"> </p>
 <p>In its essence, the <span class="caps">RTL</span>-<span class="caps">SDR</span> provides us a digital complex baseband representation of the signal at whatever frequency band we tune to. Doing away with the added complexity of the superheterodyne architecture, the <span class="caps">RTL</span>-<span class="caps">SDR</span>&#8217;s functioning can be boiled down&nbsp;to:</p>
 <ul>
 <li>Amplification;</li>
@@ -278,7 +278,7 @@ In fact, using an experimental set of <a href="https://github.com/mutability/rtl
                 <div class="social">
                         <h2>social</h2>
                         <ul>
-                            <li><a href="http://ajoo.blog/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
+                            <li><a href="https://ajoo-github-blog-old.pages.dev/feeds/all.atom.xml" type="application/atom+xml" rel="alternate">atom feed</a></li>
 
                             <li><a href="https://github.com/Ajoo">github</a></li>
                             <li><a href="mailto:ajoo@outlook.pt">email</a></li>
